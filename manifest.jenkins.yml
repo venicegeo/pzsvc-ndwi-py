@@ -8,6 +8,6 @@ applications:
   instances: 1
   timeout: 180
   env:
-    LD_LIBRARY_PATH: "/home/vcap/app/install/lib:/home/vcap/app/install/lib64:/home/vcap/app/install/lib64/mysql:/home/vcap/app/install/lib64/atlas"
-    PATH: "/bin:/usr/bin:/home/vcap/app/install/bin:/home/vcap/app/install/lib"
-    PYTHONPATH: "/home/vcap/app/install/lib/python2.7/site-packages:/home/vcap/app/install/lib64/python2.7/site-packages"
+    LD_LIBRARY_PATH: "/home/vcap/app/lib:/home/vcap/app/lib64:/home/vcap/app/lib64/mysql:/home/vcap/app/lib64/atlas"
+    PATH: "/bin:/usr/bin:/home/vcap/app/bin:/home/vcap/app/lib"
+    PYTHONPATH: "/home/vcap/app/lib/python2.7/site-packages:/home/vcap/app/lib64/python2.7/site-packages"
