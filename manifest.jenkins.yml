@@ -10,4 +10,4 @@ applications:
   env:
     LD_LIBRARY_PATH: "/home/vcap/app/lib"
     PATH: "/bin:/usr/bin:/home/vcap/app/bin:/home/vcap/app/lib:/home/vcap/app"
-    PYTHONPATH: "/home/vcap/app/lib/python2.7/site-packages"
+    PYTHONPATH: "/home/vcap/app/lib/python2.7/dist-packages"
