@@ -8,8 +8,6 @@ export GOPATH=$root/gopath
 mkdir -p $GOPATH $GOPATH/bin $GOPATH/src $GOPATH/pkg
 source $root/ci/vars.sh
 
-unzip $root/vendor/deploy.zip -d $root
-
 go get -v github.com/venicegeo/pzsvc-exec/...
 
 src=$GOPATH/bin/pzsvc-exec

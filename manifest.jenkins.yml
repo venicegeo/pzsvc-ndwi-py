@@ -2,7 +2,7 @@ applications:
 - name: pzsvc-ndwi-py
   host: pzsvc-ndwi-py
   command: chmod 755 ./pzsvc-ndwi.bin && ./pzsvc-ndwi.bin ./pzsvc-exec.config
-  buildpack: https://github.com/venicegeo/python-buildpack
+  buildpack: https://github.com/venicegeo/binary-ndwi-py-buildpack
   memory: 1G
   disk_quota: 2G
   instances: 1
