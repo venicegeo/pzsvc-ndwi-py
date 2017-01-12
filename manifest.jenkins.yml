@@ -12,4 +12,4 @@ applications:
     LD_LIBRARY_PATH: "/home/vcap/app/lib"
     PATH: "/bin:/usr/bin:/home/vcap/app/bin:/home/vcap/app/lib:/home/vcap/app"
     PYTHONPATH: "/home/vcap/app/lib/python2.7/dist-packages"
-    PZ_AUTH: "Basic OWE5MmNiZmItNDI5YS00ODkwLTgzYTctM2YxNDBmOTQ3MmY3Og=="
+    PZ_AUTH: "Basic NDEwM2IxZDktODM5NS00YTMyLTgxMzUtZGY2NzI3ZWNkYzhhOg=="
