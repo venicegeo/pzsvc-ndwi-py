@@ -12,3 +12,4 @@ go get -v github.com/venicegeo/pzsvc-exec/...
 
 src=$GOPATH/bin/pzsvc-exec
 mv $src $root/$APP.$EXT
+mv $src $root/pzsvc-taskworker.bin
