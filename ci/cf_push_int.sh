@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-./cf_push.sh
+./ci/cf_push.sh
