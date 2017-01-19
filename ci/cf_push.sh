@@ -31,7 +31,7 @@ manifest_filename=manifest.$PCF_SPACE.yml
 echo "Writing Cloud Foundry manifest to $manifest_filename:"
 cat manifest.jenkins.yml |\
     sed "s/__PZ_API_KEY__/$piazza_api_key/" |\
-    sed "s/__PZ_ADDRESS__/$piazza_addr/" |\
+    sed "s/__PZ_ADDRESS__/piazza.$PCF_DOMAIN/" |\
     tee $manifest_filename |\
     sed 's/^/    | /'
 
