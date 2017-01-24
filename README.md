@@ -8,7 +8,13 @@ pzsvc-ndwi-py is currently configured as a taskworker/local-only service.  As su
   "data": {
     "dataInputs": {
       "body": {
-        "content": "{\"cmd\":\"-i planet.TIF --bands 2 4 --fout ./shoreline.geojson\",\"inPzFiles\":[\"e21e44dc-5ccc-414a-b047-4f45cd44ea2f\"],\"inPzNames\":[\"planet.TIF\"],\"outGeoJson\":[\"shoreline.geojson\"],\"pzAuthKey\":\"******\"}",
+        "content": "{
+          \"cmd\":\"-i planet.TIF --bands 2 4 --fout ./shoreline.geojson\",
+          \"inPzFiles\":[\"e21e44dc-5ccc-414a-b047-4f45cd44ea2f\"],
+          \"inPzNames\":[\"planet.TIF\"],
+          \"outGeoJson\":[\"shoreline.geojson\"],
+          \"pzAuthKey\":\"******\"
+        }",
         "type": "body",
         "mimeType": "application/json"
       }
