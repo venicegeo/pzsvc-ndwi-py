@@ -4,7 +4,7 @@ applications:
   command: chmod 755 ./pzsvc-ndwi.bin && ./pzsvc-ndwi.bin ./pzsvc-exec.config & chmod 755 ./pzsvc-taskworker.bin && ./pzsvc-taskworker.bin ./pzsvc-exec.config
   buildpack: https://github.com/venicegeo/binary-ndwi-py-buildpack
   health-check-type: none
-  memory: 3G
+  memory: 4G
   disk_quota: 2G
   instances: 1
   timeout: 180
