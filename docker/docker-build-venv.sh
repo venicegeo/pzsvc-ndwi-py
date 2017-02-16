@@ -2,7 +2,7 @@
 
 # Downloads and builds numpy and potrace and vendorizes them using Docker
 
-cd /jenkins/build
+cd /root/build
 virtualenv .venv
 source .venv/bin/activate
 pip install --upgrade pip

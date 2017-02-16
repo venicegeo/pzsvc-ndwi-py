@@ -3,6 +3,6 @@ services:
   bfbuild:
     build: .
     volumes:
-     - ./out:/jenkins/out
-     - ./build:/jenkins/build
+     - ./out:/root/out
+     - ./build:/root/build
 
