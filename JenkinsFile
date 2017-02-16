@@ -20,40 +20,6 @@ node ("sl61") {
     }
   }
 
-  stage("Virtualenv") {
-    sh "/bin/virtualenv .venv -p /usr/bin/python"
-    sh ".venv/bin/python --version"
-    sh ".venv/bin/pip --version"
-    withEnv(["PATH=.venv/bin:$PATH"]) {
-      sh ".venv/bin/pip install --upgrade --no-cache pip"
-      dir("${pydir}") {
-        //Build numpy in place so we can package it all up
-        sh "wget https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300"
-        sh "unzip numpy-1.12.0.zip"
-        dir("numpy-1.12.0") {
-          //"../venv/bin/python setup.py install"
-          "../venv/bin/python setup.py build_ext --inplace"
-        }
-        //sh "../venv/bin/pip install -e numpy-1.9.1"
-        sh "wget http://potrace.sourceforge.net/download/1.13/potrace-1.13.tar.gz"
-        sh "tar xvf potrace-1.13.tar.gz"
-        dir("potrace-1.13") {
-          sh "./configure --prefix=???"
-          sh "make && make install"
-        }
-        sh "wget wget http://www.antigrain.com/agg-2.5.tar.gz"
-        sh "tar xvf agg-2.5.tar.gz"
-        dir("agg-2.5") {
-          sh "automake"
-        }
-        sh "wget https://pypi.python.org/packages/28/6f/59ebf9fa50553426d28c0aec6d0690e84cca3841edd10276afaaedb8d02b/pypotrace-0.1.3.tar.gz"
-        dir("pypotrace-whatever") {
-          sh "python setup.py build_ext -L/home/vagrant/potrace-1.13/src/.libs --include-dirs=/home/vagrant/potrace-1.13/src/"
-        }
-      }
-    }
-  }
-
   stage("Build") {
     parallel(
       goBuild: {
@@ -64,14 +30,39 @@ node ("sl61") {
         }
       },
       pyBuild: {
-        dir("${pydir}") {
-          git url: "https://github.com/venicegeo/bfalg-ndwi.git"
-          sh "docker-compose build"
-          sh "docker-compose run package"
-          sh "cp -r deploy vendor"
+        sh "mkdir -p build && mkdir -p out"
+        dir("${pydir}/build}") {
+          sh "curl -L https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300 -o numpy-1.12.0.zip"
+          sh "curl -L https://pypi.python.org/packages/28/6f/59ebf9fa50553426d28c0aec6d0690e84cca3841edd10276afaaedb8d02b/pypotrace-0.1.3.tar.gz -o pypotrace-0.1.3.tar.gz"
+          sh "curl -L https://github.com/venicegeo/bfalg-ndwi/archive/master.zip -o bfalg-ndwi.zip"
+          sh "ls -al"
+          sh "unzip numpy-1.12.0.zip"
+          sh "tar xvf pypotrace-0.1.3.tar.gz"
+          sh "unzip bfalg-ndwi.zip"
+          sh "rm bfalg-ndwi.zip"
+          sh "rm numpy-1.12.0.zip"
+          sh "rm pypotrace-0.1.3.tar.gz"
+          sh "mv bfalg-ndwi-master bfalg-ndwi"
+          sh "ls -al"
+          dir("docker") {
+            sh "docker-compose rm -f && docker-compose up --build -d"
+            sh "docker-compose stop -t 1"
+          }
         }
       })
   }
+
+//  stage("Virtualenv") {
+//    sh "/bin/virtualenv .venv -p /usr/bin/python"
+//    sh ".venv/bin/python --version"
+//    sh ".venv/bin/pip --version"
+//    withEnv(["PATH=.venv/bin:$PATH"]) {
+//      sh ".venv/bin/pip install --upgrade --no-cache pip"
+//      dir("${pydir}/pzsvc-ndwi-py") {
+//        //****@TODOsh ".venv/bin/pip install docker/out/"
+//      }
+//    }
+//  }
 
   stage("Golang Security Scans") {
     withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
