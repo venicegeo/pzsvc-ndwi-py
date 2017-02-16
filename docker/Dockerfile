@@ -11,5 +11,5 @@ ADD docker-build-venv.sh /root/build.sh
 
 RUN mkdir /root/build && mkdir /root/out
 
-CMD ["/bin/bash", "/jenkins/build.sh"]
+CMD ["/bin/bash", "/root/build.sh"]
 
