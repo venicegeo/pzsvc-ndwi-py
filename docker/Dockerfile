@@ -5,12 +5,12 @@ RUN yum -y install epel-release && yum -y update\
   automake freetype-devel SDL-devel python-devel python-pip potrace-devel\
   agg-devel unzip python-virtualenv gdal-libs gdal-devel git &&\
   useradd -u 100000 -d /jenkins jenkins-slave &&\
-  mkdir /jenkins/{build,out} &&\
-  chown -R jenkins-slave:jenkins-slave /jenkins
 
 ADD docker-build-venv.sh /jenkins/build.sh
 
 USER jenkins-slave
+
+RUN mkdir /jenkins/build && mkdir /jenkins/out
 
 CMD ["/bin/bash", "/jenkins/build.sh"]
 
