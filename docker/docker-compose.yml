@@ -1,0 +1,8 @@
+version: '2'
+services:
+  bfbuild:
+    build: .
+    volumes:
+     - ./out:/jenkins/out
+     - ./build:/jenkins/build
+

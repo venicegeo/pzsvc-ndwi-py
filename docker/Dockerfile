@@ -1,7 +1,5 @@
 FROM centos:centos7
 
-WORKDIR root
-
 RUN yum -y install epel-release && yum -y update\
   && yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf\
   automake freetype-devel SDL-devel python-devel python-pip potrace-devel\
