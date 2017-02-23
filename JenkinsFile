@@ -30,39 +30,32 @@ node ("sl61") {
         }
       },
       pyBuild: {
-        sh "mkdir -p build && mkdir -p out"
-        dir("${pydir}/build}") {
-          sh "curl -L https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300 -o numpy-1.12.0.zip"
-          sh "curl -L https://pypi.python.org/packages/28/6f/59ebf9fa50553426d28c0aec6d0690e84cca3841edd10276afaaedb8d02b/pypotrace-0.1.3.tar.gz -o pypotrace-0.1.3.tar.gz"
-          sh "curl -L https://github.com/venicegeo/bfalg-ndwi/archive/master.zip -o bfalg-ndwi.zip"
-          sh "ls -al"
-          sh "unzip numpy-1.12.0.zip"
-          sh "tar xvf pypotrace-0.1.3.tar.gz"
-          sh "unzip bfalg-ndwi.zip"
-          sh "rm bfalg-ndwi.zip"
-          sh "rm numpy-1.12.0.zip"
-          sh "rm pypotrace-0.1.3.tar.gz"
-          sh "mv bfalg-ndwi-master bfalg-ndwi"
-          sh "ls -al"
+        dir("${pydir}") {
+          git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
+          sh "pwd && ls -al"
           dir("docker") {
-            sh "docker-compose rm -f && docker-compose up --build -d"
+            sh "mkdir -p build && mkdir -p out"
+            dir("build") {
+              sh "curl -L https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300 -o numpy-1.12.0.zip"
+              sh "curl -L https://pypi.python.org/packages/28/6f/59ebf9fa50553426d28c0aec6d0690e84cca3841edd10276afaaedb8d02b/pypotrace-0.1.3.tar.gz -o pypotrace-0.1.3.tar.gz"
+              sh "curl -L https://github.com/venicegeo/bfalg-ndwi/archive/master.zip -o bfalg-ndwi.zip"
+              sh "unzip numpy-1.12.0.zip"
+              sh "tar xvf pypotrace-0.1.3.tar.gz"
+              sh "unzip bfalg-ndwi.zip"
+              sh "rm bfalg-ndwi.zip"
+              sh "rm numpy-1.12.0.zip"
+              sh "rm pypotrace-0.1.3.tar.gz"
+              sh "mv bfalg-ndwi-master bfalg-ndwi"
+            }
+            sh "docker-compose rm -f"
+            sh "docker-compose build"
+            sh "docker-compose up --force-recreate"
             sh "docker-compose stop -t 1"
+            sh "mv out  ${pydir}/vendor"
           }
         }
-      })
+    })
   }
-
-//  stage("Virtualenv") {
-//    sh "/bin/virtualenv .venv -p /usr/bin/python"
-//    sh ".venv/bin/python --version"
-//    sh ".venv/bin/pip --version"
-//    withEnv(["PATH=.venv/bin:$PATH"]) {
-//      sh ".venv/bin/pip install --upgrade --no-cache pip"
-//      dir("${pydir}/pzsvc-ndwi-py") {
-//        //****@TODOsh ".venv/bin/pip install docker/out/"
-//      }
-//    }
-//  }
 
   stage("Golang Security Scans") {
     withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
@@ -76,8 +69,8 @@ node ("sl61") {
 
   stage("Python Security Scans") {
     withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-      dir("${pydir}") {
-        sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} deploy/{*.py,**/*.py}"
+      dir("${pydir}/docker/build/.venv/lib/python2.7/site-packages") {
+        sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
         sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
         //**Dont upload anything while testing
         //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/56/upload?apiKey=$THREADFIXKEY"
@@ -113,15 +106,14 @@ node ("sl61") {
   }
 
  stage("Nexus Deploy BFALG-NDWI") {
-    dir(".pydir") {
-      sh "python setup.py bdist"
-      sh "mv dist/bfalg_ndwi-*.linux-x86_64.tar.gz ../bfalg-ndwi-${env.BUILD_NUMBER}"
+    dir("${pydir}/docker") {
+      sh "tar czvf bfalg-ndwi-vendor-${env.BUILD_NUMBER}.tar.gz ./out"
     }
     mavenPush {
       mavenProject='beachfront'
       app='bfalg-ndwi'
       packaging='tar.gz'
-      mavenArtifact='bfalg-ndwi-${env.BUILD_NUMBER}'
+      mavenArtifact='bfalg-ndwi-vendor-${env.BUILD_NUMBER}'
     }
   }
 
