@@ -3,6 +3,7 @@ package:
   version: 1.14.0
 
 source:
+  # http://potrace.sourceforge.net/download/1.14/potrace-1.14.tar.gz
   path: ../vendor/potrace-1.14
 
 requirements:

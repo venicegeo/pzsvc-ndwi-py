@@ -3,6 +3,7 @@ package:
   version: "1.6.3"
 
 source:
+  # https://pypi.python.org/packages/77/8d/5f45ed34acbcd9409a4fb90ddb5d223852557ef756a47b7729fc253db7c7/Fiona-1.6.3.tar.gz#md5=f6b70e1a30fc8db597c360e375d186de
   path: ../vendor/Fiona-1.6.3
 
 requirements:

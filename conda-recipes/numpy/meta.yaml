@@ -3,9 +3,8 @@ package:
   version: 1.12.0
 
 source:
-  fn: numpy-1.12.0.zip
-  url: https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300
-  md5: 33e5a84579f31829bbbba084fe0a4300
+  # https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300
+  path: ../vendor/numpy-1.12.0
 
 requirements:
   build:
