@@ -79,7 +79,7 @@ server {
 }
 ```
 
-Selinux is enabled by default. You can either disable it, `# setenforce 0` or add the `httpd_can_network_connect`:
+Selinux is enabled by default. You can either disable it, [but you shouldn't](https://stopdisablingselinux.com/), `# setenforce 0`, or add the `httpd_can_network_connect`:
 
 `# setsebool httpd_can_network_connect on`
 
