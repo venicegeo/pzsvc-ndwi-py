@@ -23,23 +23,23 @@ The simplest way is to use [Vagrant](https://www.vagrantup.com/) and a Virtual M
 
 Install Vagrant and [Virtualbox](https://www.virtualbox.org/) if you don't have it already.
 
-The following _Vagrantfile_ will get you up and going:  
+The following _Vagrantfile_ will get you up and going:
 
 ```
-# -*- mode: ruby -*-                                                                                     
-# vi: set ft=ruby :                                                             
-                                                                                
-Vagrant.configure(2) do |config|                                                
-                                                                                
-  # A clean slate CentOS 7 Machine for experimenting and testing                
-  config.vm.define "condabld", autostart: false do |cent7|                         
-    condabld.vm.box = "bhosmer/centos7-minimal"                                    
-    condabld.vm.hostname = "condabld.rbtcloud.dev"                                    
-    condabld.vm.network "private_network", ip: "192.168.33.90"                     
-  end 
-config.vm.synced_folder ".", "/vagrant", type: "nfs"                          
-  config.vm.provider "virtualbox" do |vb|                                       
-     vb.memory = "2048"                                                         
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  # A clean slate CentOS 7 Machine for experimenting and testing
+  config.vm.define "condabld", autostart: false do |cent7|
+    condabld.vm.box = "bhosmer/centos7-minimal"
+    condabld.vm.hostname = "condabld.rbtcloud.dev"
+    condabld.vm.network "private_network", ip: "192.168.33.90"
+  end
+config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  config.vm.provider "virtualbox" do |vb|
+     vb.memory = "2048"
   end
 end
 ```
@@ -48,7 +48,7 @@ Start the machine:
 
 `$ vagrant up cent7`
 
-After it is loaded, `$ vagrant ssh cent7` 
+After it is loaded, `$ vagrant ssh cent7`
 
 ### Development tools (gcc etc.)
 
