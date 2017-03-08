@@ -95,3 +95,31 @@ You can find the [conda recipes](https://github.com/venicegeo/pzsvc-ndwi-py/tree
 For example, the `pypotrace/` directory contains a `build.sh` and a `meta.yaml`. These describe how to build the package.
 
 You can now build the conda package with `$ conda build gdal/`. The package is then automatically added to `~/miniconda2/conda-bld/`
+
+## Testing your packages locally
+
+You can now use miniconda to test your package locally.
+
+Using an `environment.yaml` file:
+
+```
+name: bfalg
+channels:
+  - http://192.168.33.90
+  - conda-forge
+  - defaults
+dependencies:
+- python=2.7.13
+- pip
+- pypotrace=0.1.3
+- libpotrace=1.14.0
+- libagg=2.5.0
+- fiona=1.6.3
+- gdal=1.11.2
+- gippy
+```
+
+Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yml`
+
+To clean the environment for another run `$ conda env remove -n bfalg`
+
