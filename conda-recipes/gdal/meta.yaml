@@ -1,0 +1,22 @@
+package:
+  name: gdal
+  version: 1.11.2
+
+source:
+  path: ../vendor/gdal-1.11.2
+requirements:
+  build:
+    - python
+    - numpy          [unix]
+    - hdf5           [unix]
+    - libnetcdf      [unix]
+  run:
+    - python
+    - numpy
+    - hdf5           [unix]
+    - libnetcdf      [unix]
+
+about:
+  home: http://www.gdal.org/
+  license: MIT
+  summary: 'GDAL: Geospatial Data Abstraction Library'

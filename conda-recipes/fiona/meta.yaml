@@ -1,0 +1,30 @@
+package:
+  name: fiona
+  version: "1.6.3"
+
+source:
+  path: ../vendor/Fiona-1.6.3
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - six
+    - click
+    - click-plugins
+    - cligj
+    - requests
+    - gdal 1.11.2
+  run:
+    - python
+    - six
+    - click
+    - click-plugins
+    - cligj
+    - requests
+    - gdal 1.11.2
+
+about:
+  home: http://google.com
+  license: BSD
+  #license_file: LICENSE

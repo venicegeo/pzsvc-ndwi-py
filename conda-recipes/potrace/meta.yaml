@@ -1,0 +1,20 @@
+package:
+  name: libpotrace
+  version: 1.14.0
+
+source:
+  path: ../vendor/potrace-1.14
+
+requirements:
+  build:
+    - gcc
+    - libgfortran
+
+  run:
+    - openblas
+    - python
+
+about:
+  home: https://www.potrace.org
+  summary: "Does potracy stuffs"
+  license: BSD

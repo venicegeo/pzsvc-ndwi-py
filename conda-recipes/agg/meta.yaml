@@ -1,0 +1,16 @@
+package:
+  name: libagg
+  version: 2.5.0
+
+source:
+  path: ../vendor/agg-2.5
+
+requirements:
+  build:
+    - gcc
+    - libgfortran
+
+about:
+  home: https://www.agg.org
+  summary: "Does agg stuffs"
+  license: BSD

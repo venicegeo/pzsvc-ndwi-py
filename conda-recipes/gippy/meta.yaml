@@ -1,0 +1,25 @@
+package:
+  name: gippy
+  version: 1.0.0b8
+
+source:
+  path: ../vendor/gippy
+requirements:
+  build:
+    - gcc
+    - libgfortran
+    - numpy
+    - python
+
+  run:
+    - python
+    - numpy
+    - gdal 1.11.2
+
+build:
+  string: py{{py}}_0
+
+about:
+  home: https://github.com/gipit/gippy
+  summary: "Does gippy stuffs"
+  license: Apache 2.0
