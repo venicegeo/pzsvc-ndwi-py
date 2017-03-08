@@ -1,0 +1,97 @@
+# Using Miniconda to get to PCF
+
+## The problem
+
+There are many dependent C++ libraries and shared objects that aren't installed
+in our Jenkins or PCF instances. We need to bring these in ourselves. Pip within PCF
+is buggy and misses ordering dependencies.
+
+## The solution
+
+Use [Miniconda](https://conda.io/miniconda.html) to package all of the Python and Libraries we need
+
+## How?
+
+Miniconda works in a similar way as pip and virtualenv. It packages all of the dependecies in a
+non-system location and you can deploy your app. [Conda Recipes](https://github.com/conda/conda-recipes) are built using _yaml_ and shell scripts.
+
+## Get Started
+
+### Vagrant and Virtualbox
+
+The simplest way is to use [Vagrant](https://www.vagrantup.com/) and a Virtual Machine.
+
+Install Vagrant and [Virtualbox](https://www.virtualbox.org/) if you don't have it already.
+
+The following _Vagrantfile_ will get you up and going:  
+
+```
+# -*- mode: ruby -*-                                                                                     
+# vi: set ft=ruby :                                                             
+                                                                                
+Vagrant.configure(2) do |config|                                                
+                                                                                
+  # A clean slate CentOS 7 Machine for experimenting and testing                
+  config.vm.define "condabld", autostart: false do |cent7|                         
+    condabld.vm.box = "bhosmer/centos7-minimal"                                    
+    condabld.vm.hostname = "condabld.rbtcloud.dev"                                    
+    condabld.vm.network "private_network", ip: "192.168.33.90"                     
+  end 
+config.vm.synced_folder ".", "/vagrant", type: "nfs"                          
+  config.vm.provider "virtualbox" do |vb|                                       
+     vb.memory = "2048"                                                         
+  end
+end
+```
+
+Start the machine:
+
+`$ vagrant up cent7`
+
+After it is loaded, `$ vagrant ssh cent7` 
+
+### Development tools (gcc etc.)
+
+Install the development tools:
+
+`# yum -y install epel-release && yum -y update  && yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf  automake freetype-devel SDL-devel python-devel`
+
+Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ within the virtual-machine.
+
+### Serving a local Conda repo
+
+Conda expects repos to be available via http and currently doesn't support a direct filesystem.
+
+I installed NGINX and just served the repo files on the machine I use to build from.
+
+After building, your repo will be located in `~/miniconda2/conda-bld/`. Here's the `/etc/nginx/conf.d/anacond.conf` file:
+
+
+```
+server {
+    listen 80;
+    server_name 192.168.33.90;
+    #root /usr/share/nginx/html/anaconda/conda-bld/;
+    root /home/vagrant/miniconda2/conda-bld/;
+    location / {
+      autoindex on;
+    }
+}
+```
+
+Selinux is enabled by default. You can either disable it, `# setenforce 0` or add the `httpd_can_network_connect`:
+
+`# setsebool httpd_can_network_connect on`
+
+### Conda Build
+
+All that's left now is to install [conda build](https://github.com/conda/conda-build). `$ conda install conda-build`
+
+
+## Building Packages
+
+You can find the [conda recipes](https://github.com/venicegeo/pzsvc-ndwi-py/tree/pipeline-refactor/conda-recipes) in the [pzsv-ndwi-py](https://github.com/venicegeo/pzsvc-ndwi-py) repo.
+
+For example, the `pypotrace/` directory contains a `build.sh` and a `meta.yaml`. These describe how to build the package.
+
+You can now build the conda package with `$ conda build gdal/`. The package is then automatically added to `~/miniconda2/conda-bld/`
