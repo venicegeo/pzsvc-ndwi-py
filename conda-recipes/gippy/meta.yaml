@@ -9,13 +9,13 @@ requirements:
     - gcc
     - python
     - numpy 1.12.0
-    #- gdal 2.1.3
+    - gdal 2.1.3
 
   run:
     - python
     - numpy 1.12.0
     - fiona 1.7.4 
-    - gdal 2.1.3
+    #- gdal 2.1.3
     - jpeg
     - potrace 1.11
 
