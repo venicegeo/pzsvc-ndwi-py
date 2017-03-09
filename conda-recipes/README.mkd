@@ -58,7 +58,7 @@ Install the development tools:
 # sudo yum -y update
 # sudo yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf automake freetype-devel SDL-devel python-devel
 ```
-Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ within the virtual-machine.
+Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ within the virtual-machine (version 2, Python 2.7, please).
 
 ### Serving a local Conda repo
 
