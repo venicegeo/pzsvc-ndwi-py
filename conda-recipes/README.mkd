@@ -64,7 +64,7 @@ Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ with
 
 Conda expects repos to be available via http and currently doesn't support a direct filesystem.
 
-I installed NGINX and just served the repo files on the machine I use to build from.
+I installed NGINX (yum install) and just served the repo files on the machine I use to build from.
 
 After building, your repo will be located in `~/miniconda2/conda-bld/`. Here's the `/etc/nginx/conf.d/anacond.conf` file:
 
