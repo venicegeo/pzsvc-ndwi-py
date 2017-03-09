@@ -10,13 +10,13 @@ requirements:
     - gcc
     - python
     - numpy 1.12.0
-    - fiona 1.6.3
+    #- fiona 1.6.3
   run:
     - python
     - numpy 1.12.0
-    - libpotrace 1.14.0
-    - libagg 2.5.0
-    - fiona 1.6.3
+    #- libpotrace 1.14.0
+    #- libagg 2.5.0
+    #- fiona 1.6.3
 
 build:
   string: py{{py}}_0

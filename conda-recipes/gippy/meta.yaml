@@ -7,14 +7,17 @@ source:
 requirements:
   build:
     - gcc
-    - libgfortran
-    - numpy
     - python
+    - numpy 1.12.0
+    #- gdal 2.1.3
 
   run:
     - python
-    - numpy
-    - gdal 1.11.2
+    - numpy 1.12.0
+    - fiona 1.7.4 
+    - gdal 2.1.3
+    - jpeg
+    - potrace 1.11
 
 build:
   string: py{{py}}_0
