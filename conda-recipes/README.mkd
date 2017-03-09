@@ -55,7 +55,9 @@ After it is loaded, `$ vagrant ssh condabld`
 Install the development tools:
 
 `# sudo yum -y install epel-release`
+
 `# sudo yum -y update'
+
 `# sudo yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf automake freetype-devel SDL-devel python-devel'
 
 Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ within the virtual-machine.
