@@ -32,7 +32,7 @@ The following _Vagrantfile_ will get you up and going:
 Vagrant.configure(2) do |config|
 
   # A clean slate CentOS 7 Machine for experimenting and testing
-  config.vm.define "condabld", autostart: false do |cent7|
+  config.vm.define "condabld", autostart: false do |condabld|
     condabld.vm.box = "bhosmer/centos7-minimal"
     condabld.vm.hostname = "condabld.rbtcloud.dev"
     condabld.vm.network "private_network", ip: "192.168.33.90"
@@ -46,16 +46,18 @@ end
 
 Start the machine:
 
-`$ vagrant up cent7`
+`$ vagrant up condabld`
 
-After it is loaded, `$ vagrant ssh cent7`
+After it is loaded, `$ vagrant ssh condabld`
 
 ### Development tools (gcc etc.)
 
 Install the development tools:
-
-`# yum -y install epel-release && yum -y update  && yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf  automake freetype-devel SDL-devel python-devel`
-
+```
+# sudo yum -y install epel-release
+# sudo yum -y update
+# sudo yum -y install zlib-devel gcc gcc-c++ autogen libtool make autoconf automake freetype-devel SDL-devel python-devel
+```
 Now you can [install](https://conda.io/docs/install/quick.html) _miniconda_ within the virtual-machine.
 
 ### Serving a local Conda repo
