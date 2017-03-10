@@ -136,6 +136,7 @@ You can now use miniconda to test your package locally.
 Using an `environment.yaml` file:
 
 ```
+name: bfalg
 channels:
   - http://192.168.33.90
   - bioconda
