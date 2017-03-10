@@ -73,13 +73,33 @@ After building, your repo will be located in `~/miniconda2/conda-bld/`. Here's t
 server {
     listen 80;
     server_name 192.168.33.90;
-    #root /usr/share/nginx/html/anaconda/conda-bld/;
     root /home/vagrant/miniconda2/conda-bld/;
     location / {
       autoindex on;
     }
 }
 ```
+
+Also, modify the `/etc/nginx/nginx.conf` to run NGINX as `vagrant`:
+
+```
+...
+# For more information on configuration, see:
+#   * Official English Documentation: http://nginx.org/en/docs/
+#   * Official Russian Documentation: http://nginx.org/ru/docs/
+
+#user nginx;
+user vagrant;
+...
+```
+
+***CAUTION Only for Local Development***
+If you know how to configure your firewall to allow external http traffic, 
+configure it to do so. Otherwise, for this local development environment, you can 
+simply disable it:
+
+`# systemctl disable firewalld`
+`# systemctl stop firewalld`
 
 Selinux is enabled by default. You can either disable it, [but you shouldn't](https://stopdisablingselinux.com/), `# setenforce 0`, or add the `httpd_can_network_connect`:
 
