@@ -1,0 +1,31 @@
+package:
+  name: bfalg-ndwi
+  version: 0.1.0
+
+source:
+  # https://github.com/venicegeo/bfalg-ndwi/archive/develop.zip
+  path: ../vendor/bfalg-ndwi
+requirements:
+  build:
+    - gcc
+    - python
+    - numpy 1.12.0
+    - gippy
+    - beachfront
+    - pypotrace
+
+  run:
+    - python
+    - numpy 1.12.0
+    - gippy
+    - beachfront
+    - pypotrace
+
+build:
+  string: py{{py}}_0
+  #binary_relocation: False
+
+about:
+  home: https://github.com/venicegeo/bfalg-ndwi
+  summary: "A library and a CLI for running shoreline detection "
+  license: Apache 2.0
