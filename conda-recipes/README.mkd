@@ -156,6 +156,7 @@ You can now use miniconda to test your package locally.
 Using an `environment.yaml` file:
 
 ```
+name: bfalg
 channels:
   - http://192.168.33.90
   - bioconda
@@ -173,7 +174,7 @@ dependencies:
   - gippy
 ```
 
-Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yml`
+Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yaml`
 
 To clean the environment for another run `$ source deactivate` and then
  `$ conda env remove -n bfalg`.
