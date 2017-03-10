@@ -134,25 +134,27 @@ You can now use miniconda to test your package locally.
 Using an `environment.yaml` file:
 
 ```
-name: bfalg
 channels:
   - http://192.168.33.90
+  - bioconda
   - conda-forge
   - defaults
 dependencies:
-- python=2.7.13
-- pip
-- pypotrace=0.1.3
-- libpotrace=1.14.0
-- libagg=2.5.0
-- fiona=1.6.3
-- gdal=1.11.2
-- gippy
+  - python=2.7.13
+  - pip
+  - cython
+  - pypotrace=0.1.3
+  - potrace=1.11
+  - libagg=2.5.0
+  - fiona=1.7.4
+  - gdal=2.1.3
+  - gippy
 ```
 
 Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yml`
 
-To clean the environment for another run `$ conda env remove -n bfalg`
+To clean the environment for another run `$ source deactivate` and then
+ `$ conda env remove -n bfalg`.
 
 After conda creates the environment, you can invoke your local interpreter with:
 
