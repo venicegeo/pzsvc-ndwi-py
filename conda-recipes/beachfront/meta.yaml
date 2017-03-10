@@ -1,0 +1,35 @@
+package:
+  name: beachfront
+  version: 0.1.0
+
+source:
+  # https://github.com/venicegeo/beachfront-py
+  path: ../vendor/beachfront
+requirements:
+  build:
+    - gcc
+    - python
+    - numpy 1.12.0
+    - gippy
+    - pypotrace
+    - requests
+    - fiona
+    - six
+
+  run:
+    - python
+    - numpy 1.12.0
+    - gippy
+    - pypotrace
+    - requests
+    - fiona
+    - six
+
+build:
+  string: py{{py}}_0
+  #binary_relocation: False
+
+about:
+  home: https://github.com/venicegeo/beachfront-py
+  summary: "A library of functions used for the creation of vector shorelines automatically from imagery"
+  license: Apache 2.0
