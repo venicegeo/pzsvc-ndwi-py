@@ -3,6 +3,7 @@ package:
   version: 1.0.0b8
 
 source:
+  # https://github.com/gipit/gippy/archive/develop.zip
   path: ../vendor/gippy
 requirements:
   build:
