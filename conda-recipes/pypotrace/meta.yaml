@@ -10,6 +10,8 @@ requirements:
     - gcc
     - python
     - numpy 1.12.0
+    - libagg
+    - potrace
     #- fiona 1.6.3
   run:
     - python
