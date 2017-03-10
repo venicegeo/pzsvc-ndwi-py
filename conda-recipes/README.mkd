@@ -153,7 +153,7 @@ dependencies:
   - gippy
 ```
 
-Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yml`
+Place this in `~/pzsvc/environment.yaml` and `$ conda env create -f pzsvc/environment.yaml`
 
 To clean the environment for another run `$ source deactivate` and then
  `$ conda env remove -n bfalg`.
