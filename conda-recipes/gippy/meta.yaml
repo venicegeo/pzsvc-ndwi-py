@@ -11,6 +11,7 @@ requirements:
     - python
     - numpy 1.12.0
     - libgdal 2.1.0
+    #- swig
     - potrace 1.11
 
   run:
@@ -22,6 +23,7 @@ requirements:
 
 build:
   string: py{{py}}_0
+  binary_relocation: False
 
 about:
   home: https://github.com/gipit/gippy
