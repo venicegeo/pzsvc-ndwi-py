@@ -88,7 +88,7 @@ Selinux is enabled by default. You can either disable it, [but you shouldn't](ht
 ### Conda Build
 
 We use potrace provided by bioconda. You can add the channel so that conda
-will find it when building with `conda channel --add bioconda`
+will find it when building with `conda config --add channels bioconda`
 
 All that's left now is to install [conda build](https://github.com/conda/conda-build). `$ conda install conda-build`
 
