@@ -9,20 +9,20 @@ requirements:
   build:
     - gcc
     - python
-    - numpy 1.12.0
     - gippy
     - pypotrace
     - requests
     - fiona
+    - pyproj
     - six
 
   run:
     - python
-    - numpy 1.12.0
     - gippy
     - pypotrace
     - requests
     - fiona
+    - pyproj
     - six
 
 build:
