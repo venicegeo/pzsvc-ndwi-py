@@ -124,6 +124,8 @@ You can find the [conda recipes](https://github.com/venicegeo/pzsvc-ndwi-py/tree
 
 For example, the `pypotrace/` directory contains a `build.sh` and a `meta.yaml`. These describe how to build the package.
 
+The [_meta.yaml_](https://github.com/conda/conda-docs/blob/master/docs/source/building/meta-yaml.rst#id11) file has lots of options that might suit your needs.
+
 Some packages don't exist in the Anaconda.org repo. Those are the ones that we
 have to build with conda.
 
