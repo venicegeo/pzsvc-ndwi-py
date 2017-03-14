@@ -110,7 +110,9 @@ Selinux is enabled by default. You can either disable it, [but you shouldn't](ht
 
 We use potrace provided by th bioconda channel and gdal which comes from the conda-forge channel. You can add these channels so that conda will find them when building with: 
 
-`$ conda config --add channels bioconda conda-forge`
+`$ conda config --add channels conda-forge`
+`$ conda config --add channels bioconda`
+`$ conda config --add channels NESII`
 
 All that's left now is to install [conda build](https://github.com/conda/conda-build). `$ conda install conda-build`
 
@@ -164,6 +166,7 @@ channels:
   - bioconda
   - conda-forge
   - defaults
+  - NESII
 dependencies:
   - python=2.7.13
   - pip
