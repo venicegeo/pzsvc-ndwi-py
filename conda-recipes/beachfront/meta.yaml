@@ -11,16 +11,17 @@ requirements:
     - python
     - gippy
     - pypotrace
-    - requests
+    - requests 2.11.1
     - fiona
     - pyproj
     - six
+    - setuptools
 
   run:
     - python
     - gippy
     - pypotrace
-    - requests
+    - requests 2.11.1
     - fiona
     - pyproj
     - six
