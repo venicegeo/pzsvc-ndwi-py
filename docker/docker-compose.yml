@@ -1,8 +1,0 @@
-version: '2'
-services:
-  bfbuild:
-    build: .
-    volumes:
-     - ./out:/root/out
-     - ./build:/root/build
-
