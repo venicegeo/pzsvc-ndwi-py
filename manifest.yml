@@ -1,7 +1,7 @@
 ---
 applications:
 - name: pzsvc-ndwi
-  command: /home/vcap/app/.conda/envs/dep_env/bin/pzsvc-taskworker /home/vcap/app/pzsvc-exec.conf && /home/vcap/app/.conda/envs/dep_env/bin/pzsvc-exec /home/vcap/app/pzsvc-exec.conf
+  command: /home/vcap/app/.conda/envs/dep_env/bin/pzsvc-taskworker /home/vcap/app/pzsvc-exec.conf & /home/vcap/app/.conda/envs/dep_env/bin/pzsvc-exec /home/vcap/app/pzsvc-exec.conf
   buildpack: https://github.com/cloudfoundry/buildpack-python.git
   health_check_type: process
   #memory: 1024M
