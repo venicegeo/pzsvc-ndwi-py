@@ -1,5 +1,5 @@
-#!/usr/bin/groovy 
-@Library('pipelib@v0.2.4') _
+#!/usr/bin/groovy
+//@Library('pipelib@v0.2.4') _
 
 node ("sl61") {
 
@@ -7,19 +7,23 @@ node ("sl61") {
   def pydir = '.pydir'
   def godir = '.godir'
   def mvnHome = tool 'M3'
-  def venv = '.venv'
 
   stage("Clean/Setup") {
-    sh "rm -rf ${godir} && rm -rf ${pydir} && rm -rf ${venv}"
-    sh "mkdir -p ${pydir} && mkdir -p ${godir} && mkdir -p ${venv}"
+    sh "rm -rf ${godir} && rm -rf ${pydir}"
+    sh "mkdir -p ${pydir} && mkdir -p ${godir}"
     dir("${godir}") {
         sh "mkdir -p gopath"
         sh "mkdir -p gopath/bin"
         sh "mkdir -p gopath/src"
         sh "mkdir -p gopath/pkg"
     }
+    if(!fileExists('./miniconda2')) {
+      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
+      sh "miniconda.sh -b -p miniconda2"
+      sh "rm miniconda.sh
+    }
   }
-
+}
   stage("Build") {
     parallel(
       goBuild: {
