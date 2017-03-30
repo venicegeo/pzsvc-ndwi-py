@@ -3,71 +3,36 @@
 
 node ("sl61") {
 
-  def goHome = tool 'golang_1_7'
-  def pydir = '.pydir'
-  def godir = '.godir'
-  def mvnHome = tool 'M3'
-
-  stage("Clean/Setup") {
-    sh "rm -rf ${godir} && rm -rf ${pydir}"
-    sh "mkdir -p ${pydir} && mkdir -p ${godir}"
-    dir("${godir}") {
-        sh "mkdir -p gopath"
-        sh "mkdir -p gopath/bin"
-        sh "mkdir -p gopath/src"
-        sh "mkdir -p gopath/pkg"
-    }
+  stage("Conda Setup") {
     if(!fileExists('./miniconda2')) {
       sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
-      sh "miniconda.sh -b -p miniconda2"
-      sh "rm miniconda.sh
+      sh "bash miniconda.sh -b -p miniconda2"
+      sh "rm miniconda.sh"
+      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+        sh "conda install conda-build"
+      }
     }
   }
-}
-  stage("Build") {
-    parallel(
-      goBuild: {
-        withEnv(["PATH+=${goHome}/bin:${pwd}/gopath/bin", "GOROOT=${goHome}", "GOPATH=${pwd()}/gopath"]) {
-          dir("${godir}/${GOPATH}/src") {
-            sh "go get github.com/venicegeo/pzsvc-exec/..."
-          }
+
+  stage("Conda Build") {
+    if(!fileExists('./pzsvc-workdir')) {
+      sh "mkdir -p pzsvc-workdir"
+    }
+    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+      dir("pzsvc-workdir") {
+        git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
+        dir("conda-recipes/vendor") {
+          sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
         }
-      },
-      pyBuild: {
-        dir("${pydir}") {
-          git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
-          sh "pwd && ls -al"
-          dir("docker") {
-            sh "mkdir -p build && mkdir -p out"
-            dir("build") {
-              sh "curl -L https://pypi.python.org/packages/b7/9d/8209e555ea5eb8209855b6c9e60ea80119dab5eff5564330b35aa5dc4b2c/numpy-1.12.0.zip#md5=33e5a84579f31829bbbba084fe0a4300 -o numpy-1.12.0.zip"
-              sh "curl -L https://pypi.python.org/packages/28/6f/59ebf9fa50553426d28c0aec6d0690e84cca3841edd10276afaaedb8d02b/pypotrace-0.1.3.tar.gz -o pypotrace-0.1.3.tar.gz"
-              sh "curl -L https://github.com/venicegeo/bfalg-ndwi/archive/master.zip -o bfalg-ndwi.zip"
-              sh "unzip numpy-1.12.0.zip"
-              sh "tar xvf pypotrace-0.1.3.tar.gz"
-              sh "unzip bfalg-ndwi.zip"
-              sh "rm bfalg-ndwi.zip"
-              sh "rm numpy-1.12.0.zip"
-              sh "rm pypotrace-0.1.3.tar.gz"
-              sh "mv bfalg-ndwi-master bfalg-ndwi"
-            }
-            sh "docker-compose rm -f"
-            sh "docker-compose build"
-            sh "docker-compose up --force-recreate"
-            sh "docker-compose stop -t 1"
-            sh "mv out  ${pydir}/vendor"
-          }
-        }
-    })
+      }
+    }
   }
 
-  stage("Golang Security Scans") {
+  stage("Golang Security Scan Pass/Fail") {
     withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-      dir("${godir}") {
-        sh '/opt/dependency-check/bin/dependency-check.sh --project "PZ SVC Exec" --scan "." --format "XML" --enableExperimental'
-        //**Dont upload anything while testing
-        //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/69/upload?apiKey=$THREADFIXKEY"
-      }
+      sh "echo 'Scan Pass/Fail running'"
+      git url: "https://github.com/venicegeo/sspf"
+      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/56?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
     }
   }
 
@@ -85,7 +50,7 @@ node ("sl61") {
     }
  }
 
-  stage("Scan Pass/Fail") {
+  stage("Python Security Scan Pass/Fail") {
     withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
       sh "echo 'Scan Pass/Fail running'"
       git url: "https://github.com/venicegeo/sspf"
@@ -95,18 +60,8 @@ node ("sl61") {
 
   stage("Nexus Deploy PZSVC-EXEC/TASKWRKR") {
     sh "echo 'nexus deploy here'"
-    mavenPush {
-      mavenProject='beachfront'
-      app='pzsvc-exec'
-      packaging='bin'
-      mavenArtifact='./gopath/bin/pzsvc-exec'
-    }
-    mavenPush {
-      mavenProject='beachfront'
-      app='pzsvc-taskworker'
-      packaging='bin'
-      mavenArtifact='./gopath/bin/pzsvc-taskworker'
-    }
+    dir("./miniconda2/conda-bld") {
+      sh "
   }
 
  stage("Nexus Deploy BFALG-NDWI") {
