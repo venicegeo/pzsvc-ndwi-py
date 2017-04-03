@@ -1,92 +1,120 @@
 #!/usr/bin/groovy
-//@Library('pipelib@v0.2.4') _
+@Library('pipelib@v0.2.4') _
 
 node ("sl61") {
 
-  stage("Conda Setup") {
-    if(!fileExists('./miniconda2')) {
-      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
-      sh "bash miniconda.sh -b -p miniconda2"
-      sh "rm miniconda.sh"
-      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-        sh "conda install conda-build"
-      }
+  stage("PZSVC-EXEC/TASK Scan Pass/Fail") {
+    withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
+      sh "echo 'Scan Pass/Fail running'"
+      git url: "https://github.com/venicegeo/sspf"
+      //sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/56?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
     }
   }
 
-  stage("Conda Build") {
-    if(!fileExists('./pzsvc-workdir')) {
-      sh "mkdir -p pzsvc-workdir"
+
+  stage("PZSVC Deps Security Scans") {
+    if(fileExists('./pzsvc-ndwi-repo')) {
+      deleteDir()
     }
-    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-      dir("pzsvc-workdir") {
-        git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
-        dir("conda-recipes/vendor") {
-          sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
+    sh "mkdir -p pzsvc-ndwi-repo"
+    dir("pzsvc-ndwi-repo") {
+      git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
+        sh "git submodule init"
+        sh "git submodule update --recursive"
+        sh "echo 'fortify stuffs'"
+        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
+          dir("./conda-recipes/vendor") {
+            parallel(
+              gippyscan: {
+                dir("./gippy") {
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
+                  //**Dont upload anything while testing
+                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Gippy" --scan "." --format "XML" --enableExperimental'
+                //**Dont upload anything while testing
+                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                }
+              },
+              bfalgscan: {
+                dir("./bfalg-py") {
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
+                  //**Dont upload anything while testing
+                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Bfalg-ndwi" --scan "." --format "XML" --enableExperimental'
+                //**Dont upload anything while testing
+                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                }
+              },
+              beachfront: {
+                dir("./beachfront-py") {
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
+                  //**Dont upload anything while testing
+                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Beachfron" --scan "." --format "XML" --enableExperimental'
+                //**Dont upload anything while testing
+                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                }
+              }
+            )
+          }
         }
-      }
     }
   }
 
-  stage("Golang Security Scan Pass/Fail") {
-    withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-      sh "echo 'Scan Pass/Fail running'"
-      git url: "https://github.com/venicegeo/sspf"
-      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/56?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
+  stage("Gippy Scans Pass/Fail") {
+    dir("./ssfp") {
+      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
+      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
+      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
     }
   }
 
-  stage("Python Security Scans") {
-    withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-      dir("${pydir}/docker/build/.venv/lib/python2.7/site-packages") {
-        sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
-        sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-        //**Dont upload anything while testing
-        //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/56/upload?apiKey=$THREADFIXKEY"
-        sh '/opt/dependency-check/bin/dependency-check.sh --project "PZ BFLG NDWI" --scan "." --format "XML" --enableExperimental'
-        //**Dont upload anything while testing
-        //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/69/upload?apiKey=$THREADFIXKEY"
-      }
-    }
- }
 
-  stage("Python Security Scan Pass/Fail") {
-    withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-      sh "echo 'Scan Pass/Fail running'"
-      git url: "https://github.com/venicegeo/sspf"
-      sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/56?apiKey=$THREADFIXKEY' | ./sspf/sspf.py"
-    }
-  }
+//  stage("Conda Setup") {
+//    // Install miniconda and conda build
+//    if(!fileExists('./miniconda2')) {
+//      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
+//      sh "bash miniconda.sh -b -p miniconda2"
+//      sh "rm miniconda.sh"
+//      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+//        sh "conda install conda-build"
+//      }
+//    }
+//  }
+//
+//  stage("Conda Build") {
+//    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+//      dir("./pzsvc-ndwi-repo/vendor") {
+//        // Loop through the vendor/ directories and build the packages using conda
+//        sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
+//      }
+//    }
+//  }
 
-  stage("Nexus Deploy PZSVC-EXEC/TASKWRKR") {
-    sh "echo 'nexus deploy here'"
-    dir("./miniconda2/conda-bld") {
-      sh "
-  }
-
- stage("Nexus Deploy BFALG-NDWI") {
-    dir("${pydir}/docker") {
-      sh "tar czvf bfalg-ndwi-vendor-${env.BUILD_NUMBER}.tar.gz ./out"
-    }
-    mavenPush {
-      mavenProject='beachfront'
-      app='bfalg-ndwi'
-      packaging='tar.gz'
-      mavenArtifact='bfalg-ndwi-vendor-${env.BUILD_NUMBER}'
-    }
-  }
-
-  stage("Staging Deploy") {
-    // Do Cloudfoundry Push
-    git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git"
-    dir("pzsvc-ndwi-py") {
-      cfPush{
-        cfTarget = 'stage'
-      }
-      cfBgDeploy {
-        cfTarget = 'stage'
-      }
-    }
-  }
+//  stage("Nexus Deploy pzsvc-ndwi") {
+//    dir("./miniconda1") {
+//      sh """
+//         for f in $(find . -type f); do
+//            curl -T "$f" -u $NEXUSUSER:$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda-snowflake/$f
+//         done
+//         """
+//    }
+//  }
+//
+//  stage("Staging Deploy") {
+//    // Do Cloudfoundry Push
+//    git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git"
+//    dir("pzsvc-ndwi-py") {
+//      cfPush{
+//        cfTarget = 'stage'
+//      }
+//      cfBgDeploy {
+//        cfTarget = 'stage'
+//      }
+//    }
+//  }
 }
 
