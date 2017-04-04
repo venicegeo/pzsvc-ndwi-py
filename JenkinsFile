@@ -27,7 +27,7 @@ node ("sl61") {
             parallel(
               gippyscan: {
                 dir("./gippy") {
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py} -exclude ./test/ -exclude gippy/test.py"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   //**Dont upload anything while testing
                  //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
@@ -38,7 +38,7 @@ node ("sl61") {
               },
               bfalgscan: {
                 dir("./bfalg-py") {
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py} -exclude ./test/"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   //**Dont upload anything while testing
                  //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
@@ -49,7 +49,7 @@ node ("sl61") {
               },
               beachfront: {
                 dir("./beachfront-py") {
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./{*.py,**/*.py} -exclude ./test/"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   //**Dont upload anything while testing
                  //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
