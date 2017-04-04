@@ -57,7 +57,7 @@ node ("sl61") {
 
   stage("PZSVC Scans Pass/Fail") {
     git url: "https://github.com/venicegeo/sspf"
-    dir("./ssfp") {
+    dir("./sspf") {
       withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
         //sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/##?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
