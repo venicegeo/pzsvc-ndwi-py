@@ -61,7 +61,7 @@ node ("sl61") {
       withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
         //sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/##?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
-        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92apiKey=$THREADFIXKEY' | ./sspf.py"
+        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
       }
     }
