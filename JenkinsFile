@@ -18,35 +18,43 @@ node ("sl61") {
             parallel(
               gippyscan: {
                 dir("./gippy") {
+                  // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./gippy/{*.py,**/*.py}"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  //**Dont upload anything while testing
-                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
-                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Gippy" --scan "." --format "XML" --enableExperimental'
-                //**Dont upload anything while testing
-                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                  // **OWASP**
+                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Gippy" --scan "." --format "XML" --enableExperimental'
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
                 }
               },
               bfalgscan: {
                 dir("./bfalg-ndwi") {
+                  // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./bfalg_ndwi/{*.py,**/*.py}"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  //**Dont upload anything while testing
-                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
-                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Bfalg-ndwi" --scan "." --format "XML" --enableExperimental'
-                //**Dont upload anything while testing
-                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                  // **OWASP**
+                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Bfalg-ndwi" --scan "." --format "XML" --enableExperimental'
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
                 }
               },
               beachfront: {
                 dir("./beachfront-py") {
+                  // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./beachfront/{*.py,**/*.py}"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  //**Dont upload anything while testing
-                 //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
-                 sh '/opt/dependency-check/bin/dependency-check.sh --project "Beachfron" --scan "." --format "XML" --enableExperimental'
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                  // **OWASP**
+                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Beachfront Py" --scan "." --format "XML" --enableExperimental'
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                }
+              },
+              pzsvcexec: {
+                dir("./pzsvc-exec") {
+                 // **OWASP**
+                 sh '/opt/dependency-check/bin/dependency-check.sh --project "PSVC Exec" --scan "." --format "XML" --enableExperimental'
                 //**Dont upload anything while testing
-                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/##/upload?apiKey=$THREADFIXKEY"
                 }
               }
             )
@@ -68,29 +76,29 @@ node ("sl61") {
   }
 
 
-//  stage("Conda Setup") {
-//    // Install miniconda and conda build
-//    if(!fileExists('./miniconda2')) {
-//      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
-//      sh "bash miniconda.sh -b -p miniconda2"
-//      sh "rm miniconda.sh"
-//      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-//        sh "conda install conda-build"
-//      }
-//    }
-//  }
-//
-//  stage("Conda Build") {
-//    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-//      dir("./pzsvc-ndwi-repo/vendor") {
-//        // Loop through the vendor/ directories and build the packages using conda
-//        sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
-//      }
-//    }
-//  }
+  stage("Conda Setup") {
+    // Install miniconda and conda build
+    if(!fileExists('./miniconda2')) {
+      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
+      sh "bash miniconda.sh -b -p miniconda2"
+      sh "rm miniconda.sh"
+      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+        sh "conda install conda-build"
+      }
+    }
+  }
+
+  stage("Conda Build") {
+    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
+      dir("./pzsvc-ndwi-repo/vendor") {
+        // Loop through the vendor/ directories and build the packages using conda
+        sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
+      }
+    }
+  }
 
 //  stage("Nexus Deploy pzsvc-ndwi") {
-//    dir("./miniconda1") {
+//    dir("./miniconda2") {
 //      sh """
 //         for f in $(find . -type f); do
 //            curl -T "$f" -u $NEXUSUSER:$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda-snowflake/$f
