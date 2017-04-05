@@ -53,8 +53,7 @@ node ("sl61") {
                 dir("./pzsvc-exec") {
                  // **OWASP**
                  sh '/opt/dependency-check/bin/dependency-check.sh --project "PSVC Exec" --scan "." --format "XML" --enableExperimental'
-                //**Dont upload anything while testing
-                //sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/##/upload?apiKey=$THREADFIXKEY"
+                sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/94/upload?apiKey=$THREADFIXKEY"
                 }
               }
             )
@@ -67,7 +66,7 @@ node ("sl61") {
     git url: "https://github.com/venicegeo/sspf"
     dir("./sspf") {
       withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-        //sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/##?apiKey=$THREADFIXKEY' | ./sspf.py"
+        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
         sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
