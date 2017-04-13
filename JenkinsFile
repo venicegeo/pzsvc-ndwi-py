@@ -89,20 +89,27 @@ node ("sl61") {
 
   stage("Conda Build") {
     withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-      dir("./pzsvc-ndwi-repo/vendor") {
+      dir("pzsvc-ndwi-repo") {
         // Loop through the vendor/ directories and build the packages using conda
-        sh "for d in \$(find . -type d -maxdepth 1); do conda build --config-file .condarc \$d; done"
+        //sh "for d in \$(find . -type d -maxdepth 1); do conda build -c bioconda -c conda-forge \$d; done"
+        sh "conda build  ./conda-recipes/agg"
+        sh "conda build -c local -c bioconda ./conda-recipes/pypotrace"
+        sh "conda build -c local -c bioconda ./conda-recipes/gippy"
+        sh "conda build -c local -c bioconda -c conda-forge ./conda-recipes/beachfront"
+        sh "conda build -c local -c bioconda -c conda-forge ./conda-recipes/bfalg-ndwi"
       }
     }
   }
 
 //  stage("Nexus Deploy pzsvc-ndwi") {
-//    dir("./miniconda2") {
-//      sh """
-//         for f in $(find . -type f); do
-//            curl -T "$f" -u $NEXUSUSER:$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda-snowflake/$f
-//         done
-//         """
+//    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'NEXUSUSER', passwordVariable: 'NEXUSPASS']]) {
+//      dir("./miniconda2/conda-bld") {
+//        sh """
+//           for f in \$(find . -type f); do
+//              curl -T "\$f" -u \$NEXUSUSER:\$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda/$f
+//           done
+//           """
+//      }
 //    }
 //  }
 //
