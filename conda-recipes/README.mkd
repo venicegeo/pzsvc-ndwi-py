@@ -99,6 +99,7 @@ configure it to do so. Otherwise, for this local development environment, you ca
 simply disable it:
 
 `# systemctl disable firewalld`
+
 `# systemctl stop firewalld`
 
 Selinux is enabled by default. You can either disable it, [but you shouldn't](https://stopdisablingselinux.com/), `# setenforce 0`, or add the `httpd_can_network_connect`:
