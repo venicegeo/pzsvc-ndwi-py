@@ -13,6 +13,7 @@ requirements:
     - libgdal 2.1.0
     #- swig
     - potrace 1.11
+    - wheel
 
   run:
     - python
