@@ -4,7 +4,8 @@ echo "Starting conda build..."
 export PATH="$HOME/miniconda2/bin:$PATH"
 pushd `dirname $0`/pzsvc-ndwi-repo > /dev/null
 root=$(pwd -P)
-conda update conda -y
+conda update -n root conda-build -y
+conda update --all -y
 conda build agg
 conda config --add channels local
 for i in pypotrace gippy beachfront bfalg-ndwi; do
