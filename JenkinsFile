@@ -4,9 +4,7 @@
 node ("sl61") {
 
   stage("PZSVC Deps Security Scans") {
-    if(fileExists('./pzsvc-ndwi-repo')) {
-      deleteDir()
-    }
+    deleteDir()
     sh "mkdir -p pzsvc-ndwi-repo"
     dir("pzsvc-ndwi-repo") {
       git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
@@ -19,7 +17,7 @@ node ("sl61") {
               gippyscan: {
                 dir("./gippy") {
                   // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./gippy/{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./gippy/{*.py,**/*.py} -exclude **/test/* -exclude **/docker/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
                   // **OWASP**
@@ -30,7 +28,7 @@ node ("sl61") {
               bfalgscan: {
                 dir("./bfalg-ndwi") {
                   // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./bfalg_ndwi/{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./bfalg_ndwi/{*.py,**/*.py} -exclude **/test/* -exclude **/deploy/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
                   // **OWASP**
@@ -41,7 +39,7 @@ node ("sl61") {
               beachfront: {
                 dir("./beachfront-py") {
                   // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./beachfront/{*.py,**/*.py}"
+                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./beachfront/{*.py,**/*.py} -exclude **/test/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
                   sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
                   // **OWASP**
@@ -75,55 +73,50 @@ node ("sl61") {
   }
 
 
-  stage("Conda Setup") {
-    // Install miniconda and conda build
-    if(!fileExists('./miniconda2')) {
-      sh "wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh"
-      sh "bash miniconda.sh -b -p miniconda2"
-      sh "rm miniconda.sh"
-      withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-        sh "conda install conda-build"
-      }
-    }
-  }
-
   stage("Conda Build") {
-    withEnv(["PATH+=${pwd()}/miniconda2/bin"]) {
-      dir("pzsvc-ndwi-repo") {
-        // Loop through the vendor/ directories and build the packages using conda
-        //sh "for d in \$(find . -type d -maxdepth 1); do conda build -c bioconda -c conda-forge \$d; done"
-        sh "conda build  ./conda-recipes/agg"
-        sh "conda build -c local -c bioconda ./conda-recipes/pypotrace"
-        sh "conda build -c local -c bioconda ./conda-recipes/gippy"
-        sh "conda build -c local -c bioconda -c conda-forge ./conda-recipes/beachfront"
-        sh "conda build -c local -c bioconda -c conda-forge ./conda-recipes/bfalg-ndwi"
+    dir("pzsvc-ndwi-repo/docker") {
+      sh "docker-compose rm -f --all"
+      sh "docker-compose up --build --no-color"
+    }
+  }
+
+  stage("Nexus Deploy pzsvc-ndwi") {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'NEXUSUSER', passwordVariable: 'NEXUSPASS']]) {
+        dir("pzsvc-ndwi-repo/docker/out/conda-bld") {
+        sh """
+           for f in \$(find . -type f); do
+              curl -T "\$f" -u \$NEXUSUSER:\$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda/\$f
+           done
+           """
       }
     }
   }
 
-//  stage("Nexus Deploy pzsvc-ndwi") {
-//    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'NEXUSUSER', passwordVariable: 'NEXUSPASS']]) {
-//      dir("./miniconda2/conda-bld") {
-//        sh """
-//           for f in \$(find . -type f); do
-//              curl -T "\$f" -u \$NEXUSUSER:\$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda/$f
-//           done
-//           """
-//      }
-//    }
-//  }
-//
-//  stage("Staging Deploy") {
-//    // Do Cloudfoundry Push
-//    git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git"
-//    dir("pzsvc-ndwi-py") {
-//      cfPush{
-//        cfTarget = 'stage'
-//      }
-//      cfBgDeploy {
-//        cfTarget = 'stage'
-//      }
-//    }
-//  }
+
+  stage("L2 Deploy") {
+    // Do Cloudfoundry Push
+    dir("pzsvc-ndwi-repo") {
+      if(!fileExists('.cf')) {
+        sh "mkdir -p .cf"
+      }
+      withEnv(['CF_HOME=.cf']) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'CFUSER', passwordVariable: 'CFPASS']]) {
+          sh "cf api http://api.system.dev.east.paas.geointservices.io"
+          sh "cf auth  \$CFUSER \$CFPASS"
+          sh "cf target -o Optimus -s pz-dev"
+          sh "cf push"
+        }
+      }
+    // We can use this when pipelib 0.3.0 is done
+    //  cfPush {
+    //    cfTarget = 'dev'
+    //    cfOrg = 'Optimus'
+    //    cfProject = 'pz'
+    //    cfApi = 'https://api.system.dev.east.paas.geointservices.io'
+    //    cfApp = 'pzsvc-ndwi'
+    //    cfDomain = 'east.paas.geointservices.io'
+    //  }
+    }
+  }
 }
 
