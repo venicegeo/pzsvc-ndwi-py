@@ -8,13 +8,10 @@ conda update -n root conda-build -y
 conda update --all -y
 conda build agg
 conda config --add channels local
-for i in pypotrace gippy beachfront bfalg-ndwi; do
-  conda build --no-anaconda-upload --quiet $i
-done
-#conda build pypotrace
-#conda build gippy
-#conda build beachfront
-#conda build bfalg-ndwi
+conda build pypotrace
+conda build gippy
+conda build beachfront
+conda build bfalg-ndwi
 popd > /dev/null
 cp -r $HOME/miniconda2/conda-bld /$HOME/conda-repo
 

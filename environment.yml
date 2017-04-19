@@ -1,7 +1,7 @@
 name: pzsvc-ndwi
 channels:
   #- http://192.168.33.90
-  - https://proxy:proxy@nexus.devops.geointservices.io/content/sites/beachfront-conda-snowflake/ 
+  - https://proxy:proxy@nexus.devops.geointservices.io/content/sites/beachfront-conda/conda-bld
   - conda-forge
   - bioconda
   - defaults
