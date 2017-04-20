@@ -24,6 +24,6 @@ build:
   string: py{{py}}_0
 
 about:
-  home: https://www.potrace.blah
-  summary: "Does potracey stuff"
-  license: BSD
+  home: https://github.com/flupke/pypotrace
+  summary: "These bindings provide an object oriented API to the potrace library."
+  license: GPL

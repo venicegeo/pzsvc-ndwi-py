@@ -4,7 +4,6 @@ package:
 
 source:
   # https://github.com/venicegeo/beachfront-py
-  #path: ../vendor/beachfront
   path: ../vendor/beachfront-py
 requirements:
   build:

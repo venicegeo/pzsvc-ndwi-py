@@ -12,6 +12,6 @@ requirements:
     - libgfortran
 
 about:
-  home: https://www.agg.org
-  summary: "Does agg stuffs"
-  license: BSD
+  home: http://antigrain.com/
+  summary: "Anti-Grain Geometry (AGG) is a general purpose graphical toolkit written completely in standard and platform independent C++."
+  license: GPL

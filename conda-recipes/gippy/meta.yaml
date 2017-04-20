@@ -3,7 +3,7 @@ package:
   version: 1.0.0b8
 
 source:
-  # https://github.com/gipit/gippy/archive/develop.zip
+  # https://github.com/gipit/gippy
   path: ../vendor/gippy
 requirements:
   build:
@@ -28,5 +28,5 @@ build:
 
 about:
   home: https://github.com/gipit/gippy
-  summary: "Does gippy stuffs"
+  summary: "Gippy is a Python library for image processing of geospatial raster data"
   license: Apache 2.0
