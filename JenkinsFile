@@ -92,10 +92,10 @@ node ("sl61") {
     }
   }
 
-
   stage("L2 Deploy") {
     // Do Cloudfoundry Push
     dir("pzsvc-ndwi-repo") {
+      sh "ls -al"
       if(!fileExists('.cf')) {
         sh "mkdir -p .cf"
       }
@@ -104,7 +104,7 @@ node ("sl61") {
           sh "cf api http://api.system.dev.east.paas.geointservices.io"
           sh "cf auth  \$CFUSER \$CFPASS"
           sh "cf target -o Optimus -s pz-dev"
-          sh "cf push"
+          sh "cf push -b https://github.com/cloudfoundry/buildpack-python.git --health-check-type none"
         }
       }
     // We can use this when pipelib 0.3.0 is done
