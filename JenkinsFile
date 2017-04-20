@@ -11,8 +11,6 @@ node ("sl61") {
       git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
         sh "git submodule init"
         sh "git submodule update --recursive"
-        sh "find . -name docker-compose.yml"
-        sh "echo 'fortify stuffs'"
         withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
           dir("./conda-recipes/vendor") {
             parallel(
@@ -100,7 +98,6 @@ node ("sl61") {
   stage("L2 Deploy") {
     // Do Cloudfoundry Push
     dir("pzsvc-ndwi-repo") {
-      sh "ls -al"
       if(!fileExists('.cf')) {
         sh "mkdir -p .cf"
       }
