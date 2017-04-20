@@ -7,9 +7,11 @@ node ("sl61") {
     deleteDir()
     sh "mkdir -p pzsvc-ndwi-repo"
     dir("pzsvc-ndwi-repo") {
+
       git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
         sh "git submodule init"
         sh "git submodule update --recursive"
+        sh "find . -name docker-compose.yml"
         sh "echo 'fortify stuffs'"
         withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
           dir("./conda-recipes/vendor") {
@@ -61,13 +63,16 @@ node ("sl61") {
   }
 
   stage("PZSVC Scans Pass/Fail") {
-    git url: "https://github.com/venicegeo/sspf"
-    dir("./sspf") {
-      withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
-        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
-        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
-        sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
+    sh "mkdir -p sspf-repo"
+    dir("./sspf-repo") {
+      git url: "https://github.com/venicegeo/sspf"
+      dir("./sspf") {
+        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
+          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
+          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
+          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
+          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
+        }
       }
     }
   }
