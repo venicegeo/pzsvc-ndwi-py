@@ -1,17 +1,32 @@
 #!/usr/bin/groovy
-@Library('pipelib@v0.2.4') _
 
-node ("sl61") {
+node {
+
+  if(params.GITLAB_BASE_URL) {
+    stage("Update Git Submodules URL") {
+      sh "echo 'Updating git submodules url'"
+      sh "sed -i 's,https://github.com/,${params.GITLAB_BASE_URL}:,g' .gitmodules"
+      sh "sed -i 's,gipit,venicegeo,g' .gitmodules"
+      sh "sed -i 's,flupke,venicegeo,g' .gitmodules"
+    }
+  }
+
+  stage("Setup") {
+    deleteDir()
+  }
 
   stage("PZSVC Deps Security Scans") {
     deleteDir()
     sh "mkdir -p pzsvc-ndwi-repo"
     dir("pzsvc-ndwi-repo") {
-
-      git url: "https://github.com/venicegeo/pzsvc-ndwi-py.git", branch: "pipeline-refactor"
+      if(env.GITLAB_CREDS) {
+        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+      } else {
+        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
+      }
         sh "git submodule init"
         sh "git submodule update --recursive"
-        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
+        withCredentials([[$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: 'THREADFIX_KEY']]) {
           dir("./conda-recipes/vendor") {
             parallel(
               gippyscan: {
@@ -19,10 +34,10 @@ node ("sl61") {
                   // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./gippy/{*.py,**/*.py} -exclude **/test/* -exclude **/docker/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                   // **OWASP**
                   sh '/opt/dependency-check/bin/dependency-check.sh --project "Gippy" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/93/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                 }
               },
               bfalgscan: {
@@ -30,10 +45,11 @@ node ("sl61") {
                   // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./bfalg_ndwi/{*.py,**/*.py} -exclude **/test/* -exclude **/deploy/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
+
                   // **OWASP**
                   sh '/opt/dependency-check/bin/dependency-check.sh --project "Bfalg-ndwi" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/92/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                 }
               },
               beachfront: {
@@ -41,17 +57,17 @@ node ("sl61") {
                   // **Fortify**
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./beachfront/{*.py,**/*.py} -exclude **/test/*"
                   sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                   // **OWASP**
                   sh '/opt/dependency-check/bin/dependency-check.sh --project "Beachfront Py" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/91/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                 }
               },
               pzsvcexec: {
                 dir("./pzsvc-exec") {
                  // **OWASP**
                  sh '/opt/dependency-check/bin/dependency-check.sh --project "PSVC Exec" --scan "." --format "XML" --enableExperimental'
-                sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml https://threadfix.devops.geointservices.io/rest/applications/94/upload?apiKey=$THREADFIXKEY"
+                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
                 }
               }
             )
@@ -60,20 +76,20 @@ node ("sl61") {
     }
   }
 
-  stage("PZSVC Scans Pass/Fail") {
-    sh "mkdir -p sspf-repo"
-    dir("./sspf-repo") {
-      git url: "https://github.com/venicegeo/sspf"
-      dir("./sspf") {
-        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
-          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
-          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
-          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
-        }
-      }
-    }
-  }
+//  stage("PZSVC Scans Pass/Fail") {
+//    sh "mkdir -p sspf-repo"
+//    dir("./sspf-repo") {
+//      git url: "https://github.com/venicegeo/sspf"
+//      dir("./sspf") {
+//        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
+//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
+//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
+//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
+//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
+//        }
+//      }
+//    }
+//  }
 
 
   stage("Conda Build") {
