@@ -2,27 +2,25 @@
 
 node {
 
-  if(params.GITLAB_BASE_URL) {
-    stage("Update Git Submodules URL") {
-      sh "echo 'Updating git submodules url'"
-      sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL}/,g' .gitmodules"
-      sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
-      sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
-    }
-  }
-
   stage("Setup") {
     deleteDir()
   }
 
+
   stage("PZSVC Deps Security Scans") {
-    deleteDir()
     sh "mkdir -p pzsvc-ndwi-repo"
     dir("pzsvc-ndwi-repo") {
       if(env.GITLAB_CREDS) {
         git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
       } else {
         git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
+      }
+      // Update the .gitmodules to point to the secure repos
+      if(params.GITLAB_BASE_URL) {
+        sh "echo 'Updating git submodules url'"
+        sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL}/,g' .gitmodules"
+        sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
+        sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
       }
         sh "git submodule init"
         sh "git submodule update --recursive"
