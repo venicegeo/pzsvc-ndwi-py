@@ -6,22 +6,27 @@ node {
     deleteDir()
   }
 
-
   stage("PZSVC Deps Security Scans") {
     sh "mkdir -p pzsvc-ndwi-repo"
     dir("pzsvc-ndwi-repo") {
       if(env.GITLAB_CREDS) {
         git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+      // Update the submodule paths to reflect the secure repo locations
+      // and init and update the submodules
+      if(params.GITLAB_BASE_URL) {
+        if(params.GITLAB_BASE_URL) {
+          sh "echo 'Updating git submodules url'"
+          sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL},g' .gitmodules"
+          sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
+          sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
+          checkout([$class: 'GitSCM', branches: [[name: '${env.GIT_BRANCH']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '${env.GITLAB_CREDS', url: '${env.GIT_URL']]])
+        }
+      }
+
       } else {
         git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
       }
       // Update the .gitmodules to point to the secure repos
-      if(params.GITLAB_BASE_URL) {
-        sh "echo 'Updating git submodules url'"
-        sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL}/,g' .gitmodules"
-        sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
-        sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
-      }
         sh "git submodule init"
         sh "git submodule update --recursive"
         withCredentials([[$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: 'THREADFIX_KEY']]) {
