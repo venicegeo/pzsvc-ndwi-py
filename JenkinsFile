@@ -5,9 +5,9 @@ node {
   if(params.GITLAB_BASE_URL) {
     stage("Update Git Submodules URL") {
       sh "echo 'Updating git submodules url'"
-      sh "sed -i 's,https://github.com/,${params.GITLAB_BASE_URL}:,g' .gitmodules"
-      sh "sed -i 's,gipit,venicegeo,g' .gitmodules"
-      sh "sed -i 's,flupke,venicegeo,g' .gitmodules"
+      sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL}/,g' .gitmodules"
+      sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
+      sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
     }
   }
 
