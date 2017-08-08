@@ -1,15 +1,11 @@
 name: pzsvc-ndwi
 channels:
-  #- http://192.168.33.90
-  - https://proxy:proxy@nexus.devops.geointservices.io/content/sites/beachfront-conda/conda-bld
-  - conda-forge
-  - bioconda
-  - defaults
+  - https://proxy:proxy@nexus.devops.geointservices.io/content/repositories/beachfront-conda
 dependencies:
 - cython
 - numpy
 - potrace
-#- python=2.7.13
+- python=2.7.13
 - pip
 - pypotrace
 - libagg=2.5.0
