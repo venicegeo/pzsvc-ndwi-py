@@ -1,6 +1,7 @@
 #!/usr/bin/groovy
 
 node {
+	def root = pwd()
 
 	  stage("Setup") {
 			deleteDir()
@@ -10,6 +11,9 @@ node {
 			  	git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
 			}
 	  }
+
+	def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
+    def appName = "pzsvc-snowflake-ndwi-${appvers}"
 
 	stage("Archive") {
 		//todo
