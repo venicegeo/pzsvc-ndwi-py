@@ -2,142 +2,82 @@
 
 node {
 
-  stage("Setup") {
-    deleteDir()
-  }
+	  stage("Setup") {
+			deleteDir()
+			if(env.GITLAB_CREDS) {
+			  	git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+			} else {
+			  	git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
+			}
+	  }
 
-  stage("PZSVC Deps Security Scans") {
-    sh "mkdir -p pzsvc-ndwi-repo"
-    dir("pzsvc-ndwi-repo") {
-      if(env.GITLAB_CREDS) {
-        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
-      // Update the submodule paths to reflect the secure repo locations
-      // and init and update the submodules
-      if(params.GITLAB_BASE_URL) {
-        if(params.GITLAB_BASE_URL) {
-          sh "echo 'Updating git submodules url'"
-          sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL},g' .gitmodules"
-          sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
-          sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
-          checkout([$class: 'GitSCM', branches: [[name: '${env.GIT_BRANCH']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '${env.GITLAB_CREDS', url: '${env.GIT_URL']]])
+	stage("Archive") {
+		//todo
+	}
+
+
+    stage("Phase One Deploy") {
+        if(!fileExists('.cf')) {
+            sh "mkdir -p .cf"
         }
-      }
+        def piazza_api_key = "empty"
+        def piazza_url = "https://piazza.${env.PHASE_ONE_PCF_SPACE}.${env.PIAZZA_URL}"
+        /*withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.BEACHFRONT_PIAZZA_AUTH}", usernameVariable: 'TOKEN', passwordVariable: 'unused']]) {
+            def keyCurl = sh(script: """curl -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
+            piazza_api_key = sh(script: """echo \"${keyCurl}\"|grep -oE '\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}'""", returnStdout: true).trim()
+            sh """
+              if [ -z $piazza_api_key ]; then
+                echo "No Piazza API key found"
+                exit 1
+              fi
+            """
+        }*/
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_STORAGE_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
+            sh 'sed -i "s*CONDA_CHANNEL*`echo $CONDA_CHANNEL | sed -e "s/NEXUSUSER/${USER}/g" | sed -e "s/NEXUSPASS/${PASS}/g"`*g" environment.yml'
+        }
+        withEnv([
+          "CF_HOME=.cf"
+        ]) {
+            withCredentials([
+              [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
+            ]) {
+                sh """
+                  cf api ${env.PCF_API_ENDPOINT}
+                  cf auth ${CFUSER} ${CFPASS}
+                  cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
+                  cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none
+                  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
+                  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
+                  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
+                  cf set-env ${appName} PZ_ADDR ${piazza_url}
+                  cf restage ${appName}
+                """
 
-      } else {
-        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
-      }
-      // Update the .gitmodules to point to the secure repos
-        sh "git submodule init"
-        sh "git submodule update --recursive"
-        withCredentials([[$class: 'StringBinding', credentialsId: "${env.THREADFIX_API_KEY}", variable: 'THREADFIX_KEY']]) {
-          dir("./conda-recipes/vendor") {
-            parallel(
-              gippyscan: {
-                dir("./gippy") {
-                  // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./gippy/{*.py,**/*.py} -exclude **/test/* -exclude **/docker/*"
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
-                  // **OWASP**
-                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Gippy" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
+                try {
+                  sh "cf start ${appName}"
+                } catch (Exception e) {
+                  //sh "cf logs --recent ${appName}"
+                  sh "cf delete ${appName} -f"
+                  error("Error during application start. Deleting ${appName} and failing the build.")
                 }
-              },
-              bfalgscan: {
-                dir("./bfalg-ndwi") {
-                  // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./bfalg_ndwi/{*.py,**/*.py} -exclude **/test/* -exclude **/deploy/*"
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
-
-                  // **OWASP**
-                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Bfalg-ndwi" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
+                sh """
+                  cf api ${env.PCF_API_ENDPOINT}
+                  cf auth ${CFUSER} ${CFPASS}
+                  cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
+                """
+                def legacyAppNames = sh(script: """cf routes | grep \"pzsvc-ndwi \" | awk '{print \$4}'""", returnStdout: true)
+                sh "cf map-route ${appName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname pzsvc-ndwi"
+                // Remove legacy applications
+                for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
+                    def legacyAppName = legacyApp.toString().trim()
+                    if(legacyAppName != appName) {
+                        sh "cf unmap-route ${legacyAppName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname ${legacyAppName}"
+                        sh "cf delete -f ${legacyAppName}"
+                    }
                 }
-              },
-              beachfront: {
-                dir("./beachfront-py") {
-                  // **Fortify**
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER} ./beachfront/{*.py,**/*.py} -exclude **/test/*"
-                  sh "/opt/hp_fortify_sca/bin/sourceanalyzer -b ${env.BUILD_NUMBER}  -scan -Xmx8G -f fortifyResults-${env.BUILD_NUMBER}.fpr"
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@fortifyResults-${env.BUILD_NUMBER}.fpr ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
-                  // **OWASP**
-                  sh '/opt/dependency-check/bin/dependency-check.sh --project "Beachfront Py" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
-                }
-              },
-              pzsvcexec: {
-                dir("./pzsvc-exec") {
-                 // **OWASP**
-                 sh '/opt/dependency-check/bin/dependency-check.sh --project "PSVC Exec" --scan "." --format "XML" --enableExperimental'
-                  sh "/bin/curl -v --insecure -H 'Accept: application/json' -X POST --form file=@dependency-check-report.xml ${env.THREADFIX_URL}/rest/applications/${THREADFIX_ID}/upload?apiKey=${THREADFIX_KEY}"
-                }
-              }
-            )
-          }
+            }
         }
     }
-  }
 
-//  stage("PZSVC Scans Pass/Fail") {
-//    sh "mkdir -p sspf-repo"
-//    dir("./sspf-repo") {
-//      git url: "https://github.com/venicegeo/sspf"
-//      dir("./sspf") {
-//        withCredentials([[$class: 'StringBinding', credentialsId: '978C467A-2B26-47AE-AD2F-4AFD5A4AF695', variable: 'THREADFIXKEY']]) {
-//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/94?apiKey=$THREADFIXKEY' | ./sspf.py"
-//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/93?apiKey=$THREADFIXKEY' | ./sspf.py"
-//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/92?apiKey=$THREADFIXKEY' | ./sspf.py"
-//          sh "curl  --fail --silent 'https://threadfix.devops.geointservices.io/rest/applications/91?apiKey=$THREADFIXKEY' | ./sspf.py"
-//        }
-//      }
-//    }
-//  }
-
-
-  stage("Conda Build") {
-    dir("pzsvc-ndwi-repo/docker") {
-      sh "docker-compose rm -f --all"
-      sh "docker-compose up --build --no-color"
-    }
-  }
-
-  stage("Nexus Deploy pzsvc-ndwi") {
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'NEXUSUSER', passwordVariable: 'NEXUSPASS']]) {
-        dir("pzsvc-ndwi-repo/docker/out/conda-bld") {
-        sh """
-           for f in \$(find . -type f); do
-              curl -T "\$f" -u \$NEXUSUSER:\$NEXUSPASS https://nexus.devops.geointservices.io/content/sites/beachfront-conda/\$f
-           done
-           """
-      }
-    }
-  }
-
-  stage("L2 Deploy") {
-    // Do Cloudfoundry Push
-    dir("pzsvc-ndwi-repo") {
-      if(!fileExists('.cf')) {
-        sh "mkdir -p .cf"
-      }
-      withEnv(['CF_HOME=.cf']) {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ldap_baxtersh', usernameVariable: 'CFUSER', passwordVariable: 'CFPASS']]) {
-          sh "cf api http://api.system.dev.east.paas.geointservices.io"
-          sh "cf auth  \$CFUSER \$CFPASS"
-          sh "cf target -o Optimus -s pz-dev"
-          sh "cf push -b https://github.com/cloudfoundry/buildpack-python.git --health-check-type none"
-        }
-      }
-    // We can use this when pipelib 0.3.0 is done
-    //  cfPush {
-    //    cfTarget = 'dev'
-    //    cfOrg = 'Optimus'
-    //    cfProject = 'pz'
-    //    cfApi = 'https://api.system.dev.east.paas.geointservices.io'
-    //    cfApp = 'pzsvc-ndwi'
-    //    cfDomain = 'east.paas.geointservices.io'
-    //  }
-    }
-  }
 }
 

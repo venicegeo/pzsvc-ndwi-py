@@ -1,0 +1,8 @@
+applications:
+- name: pzsvc-ndwi
+  buildpack: https://github.com/cloudfoundry/buildpack-python.git
+  health_check_type: process
+  memory: 4G
+  disk_quota: 2G
+  env:
+    PATH: "/home/vcap/app/.conda/envs/dep_env/bin:/bin:/usr/bin"
