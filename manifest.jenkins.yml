@@ -1,5 +1,5 @@
 applications:
-- name: pzsvc-ndwi
+- name: pzsvc-snowflake-ndwi
   buildpack: https://github.com/cloudfoundry/buildpack-python.git
   health_check_type: process
   memory: 4G
