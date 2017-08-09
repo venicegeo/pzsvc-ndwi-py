@@ -1,6 +1,6 @@
 name: pzsvc-ndwi
 channels:
-  - https://proxy:proxy@nexus.devops.geointservices.io/content/repositories/beachfront-conda
+  - CONDA_CHANNEL
 dependencies:
 - cython
 - numpy
