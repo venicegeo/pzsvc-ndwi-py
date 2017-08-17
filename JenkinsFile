@@ -100,6 +100,7 @@ node {
       sh "docker-compose rm -f --all"
       sh "docker-compose up --build --no-color"
     }
+    error("stop")
   }
 
   stage("Nexus Deploy pzsvc-ndwi") {
