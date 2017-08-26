@@ -13,14 +13,12 @@ node {
         git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
       // Update the submodule paths to reflect the secure repo locations
       // and init and update the submodules
-      if(params.GITLAB_BASE_URL) {
         if(params.GITLAB_BASE_URL) {
           sh "echo 'Updating git submodules url'"
           sh "sed -i 's,https://github.com/venicegeo/,${params.GITLAB_BASE_URL},g' .gitmodules"
           sh "sed -i 's,https://github.com/gipit/,${params.GITLAB_BASE_URL},g' .gitmodules"
           sh "sed -i 's,https://github.com/flupke/,${params.GITLAB_BASE_URL},g' .gitmodules"
           checkout([$class: 'GitSCM', branches: [[name: '${env.GIT_BRANCH']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '${env.GITLAB_CREDS', url: '${env.GIT_URL']]])
-        }
       }
 
       } else {
