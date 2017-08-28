@@ -1,39 +1,43 @@
 # pzsvc-ndwi-py
 
-## Overview
-
 The ndwi shore-finding algorithm, written in python, and made into a Piazza service via pzsvc-exec
 
-This repo contains various git submodules for the dependent projects that are 
-integrated by `pzsvc-ndwi-py`.
+pzsvc-ndwi-py is currently configured as a taskworker/local-only service.  As such, it receives external jobs only through the Pz instance indicated at environment variable PZ_ADDR.  On startup, assuming all environment variables are set properly and the Pz instance is working, it will autoregister itself with the name "BF_Algo_NDWI_PY", and will stand by to complete any jobs sent to that service.  An example of a reasonable, working job block is as follows:
 
-This is a configuration repo meant to be used to deploy `pzsvc-ndwi-py` to
-cloudfoundry. It uses [miniconda](https://conda.io/miniconda.html) to package
-each application and then stores them in a Nexus repository. Then cloudfoundry
-uses miniconda to pull the packages and dependencies and deploy them in a 
-container.
+```
+{
+  "data": {
+    "dataInputs": {
+      "body": {
+        "content": "{
+          \"cmd\":\"-i planet.TIF --bands 2 4 --fout ./shoreline.geojson\",
+          \"inPzFiles\":[\"e21e44dc-5ccc-414a-b047-4f45cd44ea2f\"],
+          \"inPzNames\":[\"planet.TIF\"],
+          \"outGeoJson\":[\"shoreline.geojson\"],
+          \"pzAuthKey\":\"******\"
+        }",
+        "type": "body",
+        "mimeType": "application/json"
+      }
+    },
+    "dataOutput": [
+      {
+        "mimeType": "application/json",
+        "type": "text"
+      }
+    ],
+    "serviceId": "570a97f8-0a7e-4bc1-a8d5-ba68c43c56a4"
+  },
+  "type": "execute-service"
+}
+```
 
-Here's how the whole thing works:
+auth keys have been removed for obvious reasons, but otherwise, this would be a functional request to send to the POST /job endpoint of the appropriate Pz instance.
 
-1. These apps are submodules within the `conda-recipes/vendor` directory:
-    - gippy
-    - beachfront-py
-    - pzsvc-exec
-    - bfalg-ndwi
-    - pypotrace 
-2. Updates to this repo trigger a pipeline job in Jenkins
-4. The repo is cloned and submodules are inited
-5. Security scans are run on our code and the results sent to threadfix
-6. If no `High` or `Criticals` are found, a
-docker build container builds the conda packages and creates a repo
-8. The conda  repo is then stored in Nexus for later retrieval during cloudfoundry
-deployment
-9. A `cf push` then deploys `pzsvc-ndwi-py` to cloudfoundry
+Pertinent links:
+- bfalg-ndwi readme: https://github.com/venicegeo/bfalg-ndwi/blob/develop/README.md
+- pzsvc-exec readme: https://github.com/venicegeo/pzsvc-exec/blob/master/README.md
+- pzsvc-ndwi config: https://github.com/venicegeo/pzsvc-ndwi-py/blob/master/pzsvc-exec.config
 
 
-## Conda Build Process
-
-You can find more detailed [documentation](./conda-recipes/README.mkd) for the
-conda build process in the `./conda-recipes` directory in this repo.
-
-
+> TODO: revisit the necessity for creating arbitrary throwaway commits to this repo for deploying artifacts to PCF
