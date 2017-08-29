@@ -54,7 +54,6 @@ node {
                   cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
                   cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
                   cf set-env ${appName} PZ_ADDR ${piazza_url}
-                  cf restage ${appName}
                 """
 
                 try {
