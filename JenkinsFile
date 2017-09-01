@@ -3,23 +3,50 @@
 node {
 	def root = pwd()
     def nodejs = tool 'NodeJS_6'
+	def mvn = tool 'M3'
     
-	  stage("Setup") {
-			deleteDir()
-			if(env.GITLAB_CREDS) {
-			  	git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
-			} else {
-			  	git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
-			}
-	  }
+	stage("Setup") {
+		deleteDir()
+		if(env.GITLAB_CREDS) {
+			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+		} else {
+			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
+		}
+	}
 
 	def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
     def appName = "pzsvc-ndwi-${appvers}"
 
 	stage("Archive") {
-		//todo
+		def archiveName = "pzsvc-ndwi.tgz"
+		// Check if exists already
+		def getDependencyStatus = sh(script: """mvn --quiet --settings ~/.m2/settings.xml dependency:get \
+				-Dmaven.repo.local="${root}/.m2/repository" \
+				-DrepositoryId=nexus \
+				-DartifactId=pzsvc-ndwi \
+				-Dversion=${appvers} \
+				-DgroupId="org.venice.beachfront" \
+				-Dpackaging=tgz \
+				-DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" \
+				>> /dev/null 2>&1 \
+			""", returnStatus: true)
+		if (getDependencyStatus == 0) {
+			echo "Artifact version ${appvers} exists in Nexus, nothing to do"
+		} else {
+		  // Deploy file
+		  sh "tar -czf ${archiveName} -C ${root} public"
+		  sh """mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} \
+			-DrepositoryId=nexus \
+			-Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" \
+			-DgroupId="org.venice.beachfront" \
+			-DgeneratePom=false \
+			-Dpackaging=tgz \
+			-Dmaven.repo.local="${root}/.m2/repository" \
+			-DartifactId=pzsvc-ndwi \
+			-Dversion=${appvers} \
+		  """
+		}
 	}
-
 
     stage("Phase One Deploy") {
         if(!fileExists('.cf')) {
