@@ -34,7 +34,7 @@ node {
 			echo "Artifact version ${appvers} exists in Nexus, nothing to do"
 		} else {
 		  // Deploy file
-		  sh "tar -czf ${archiveName} -C ${root} public"
+		  sh "tar -cvzf  ${archiveName} JenkinsFile Procfile LICENSE environment.yml manifest.jenkins.yml pzsvc-exec.conf"
 		  sh """mvn -X --settings ~/.m2/settings.xml deploy:deploy-file -Dfile=${archiveName} \
 			-DrepositoryId=nexus \
 			-Durl="${env.ARTIFACT_STORAGE_DEPLOY_URL}" \
