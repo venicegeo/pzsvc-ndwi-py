@@ -12,6 +12,9 @@ node {
 		} else {
 			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
 		}
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
+            sh 'sed -i "s*CONDA_CHANNEL*`echo $CONDA_CHANNEL_CREDS_URL | sed -e "s/NEXUSUSER/${USER}/g" | sed -e "s/NEXUSPASS/${PASS}/g"`*g" environment.yml'
+        }
 	}
 
 	def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
@@ -63,9 +66,6 @@ node {
                 exit 1
               fi
             """
-        }
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
-            sh 'sed -i "s*CONDA_CHANNEL*`echo $CONDA_CHANNEL_CREDS_URL | sed -e "s/NEXUSUSER/${USER}/g" | sed -e "s/NEXUSPASS/${PASS}/g"`*g" environment.yml'
         }
         withEnv([
           "CF_HOME=.cf"
