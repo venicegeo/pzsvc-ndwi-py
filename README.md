@@ -39,5 +39,4 @@ Pertinent links:
 - pzsvc-exec readme: https://github.com/venicegeo/pzsvc-exec/blob/master/README.md
 - pzsvc-ndwi config: https://github.com/venicegeo/pzsvc-ndwi-py/blob/master/pzsvc-exec.config
 
-
 > TODO: revisit the necessity for creating arbitrary throwaway commits to this repo for deploying artifacts to PCF
