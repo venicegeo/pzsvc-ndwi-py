@@ -18,8 +18,8 @@ piazza_url="https://piazza.$PCF_DOMAIN"
 grep -q env manifest.jenkins.yml &&
   echo "
     PZ_API_KEY: $piazza_api_key
-    PZ_ADDRESS: $piazza_url" >> manifest.jenkins.yml ||
+    PZ_ADDR: $piazza_url" >> manifest.jenkins.yml ||
   echo "
   env:
     PZ_API_KEY: $piazza_api_key
-    PZ_ADDRESS: $piazza_url" >> manifest.jenkins.yml
+    PZ_ADDR: $piazza_url" >> manifest.jenkins.yml
