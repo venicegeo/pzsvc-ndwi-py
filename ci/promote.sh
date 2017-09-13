@@ -1,20 +1,5 @@
 #!/bin/bash -ex
 
-if [ -z $PCF_SPACE ]; then
-    echo "Cannot read PCF_SPACE from the environment"
-    exit 1
-fi
-if [ -z $PCF_DOMAIN ]; then
-    echo "Cannot read PCF_DOMAIN from the environment"
-    exit 1
-fi
-if [ -z $BEACHFRONT_PIAZZA_AUTH ]; then
-    echo "Cannot read BEACHFRONT_PIAZZA_AUTH from the environment"
-    exit 1
-fi
-
-echo ###########################################################################
-
 echo "Requesting Piazza API key via piazza.$PCF_DOMAIN"
 response=$(curl -s https://piazza.$PCF_DOMAIN/v2/key -u "$BEACHFRONT_PIAZZA_AUTH")
 echo
