@@ -14,7 +14,6 @@ node {
 		}
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
 		sh 'sed -i "s*CONDA_CHANNEL*`echo "${CONDA_CHANNEL_URL}" | sed "s#://#://${USER}:${PASS}@#g"`*g" environment.yml'
-		sh 'cat environment.yml'
         }
 	}
 
