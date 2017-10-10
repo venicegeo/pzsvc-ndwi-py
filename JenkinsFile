@@ -1,23 +1,23 @@
 #!/usr/bin/groovy
 
 node {
-	def root = pwd()
+    def root = pwd()
     def nodejs = tool 'NodeJS_6'
-	def mvn = tool 'M3'
-    
-	stage("Setup") {
-		deleteDir()
-		if(env.GITLAB_CREDS) {
-			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
-		} else {
-			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
-		}
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
-		sh 'sed -i "s*CONDA_CHANNEL*`echo "${CONDA_CHANNEL_URL}" | sed "s#://#://${USER}:${PASS}@#g"`*g" environment.yml'
-        }
-	}
+    def mvn = tool 'M3'
 
-	def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
+    stage("Setup") {
+      deleteDir()
+      if(env.GITLAB_CREDS) {
+        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
+      } else {
+        git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
+      }
+      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
+        sh 'sed -i "s*CONDA_CHANNEL*`echo "${CONDA_CHANNEL_URL}" | sed "s#://#://${USER}:${PASS}@#g"`*g" environment.yml'
+      }
+    }
+
+    def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
     def appName = "pzsvc-ndwi-${appvers}"
 
     stage("Phase One Deploy") {
@@ -108,7 +108,7 @@ node {
             }
         }
     }
-    
+
     stage("Phase Two Deploy") {
         def piazza_api_key = "empty"
         def piazza_url = "https://piazza.${env.PHASE_TWO_PCF_SPACE}.${env.PIAZZA_URL}"
