@@ -47,14 +47,15 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
                   cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none
-                  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
-                  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
-                  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
-                  cf set-env ${appName} PZ_ADDR ${piazza_url}
-                """
-
-                try {
-                  sh "cf start ${appName}"
+				"""
+				try {				
+					sh """
+					  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
+					  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
+					  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
+					  cf set-env ${appName} PZ_ADDR ${piazza_url}
+					"""
+                    sh "cf start ${appName}"
                 } catch (Exception e) {
                   //sh "cf logs --recent ${appName}"
                   sh "cf delete ${appName} -f -r"
@@ -133,14 +134,15 @@ node {
                   cf auth ${CFUSER} ${CFPASS}
                   cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
                   cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none
-                  cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
-                  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
-                  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
-                  cf set-env ${appName} PZ_ADDR ${piazza_url}
-                """
-
-                try {
-                  sh "cf start ${appName}"
+				"""
+				try {				
+					sh """				
+					  cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
+					  cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
+					  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
+					  cf set-env ${appName} PZ_ADDR ${piazza_url}
+					"""
+                    sh "cf start ${appName}"
                 } catch (Exception e) {
                   //sh "cf logs --recent ${appName}"
                   sh "cf delete ${appName} -f -r"
