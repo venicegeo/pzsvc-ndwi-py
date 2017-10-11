@@ -42,17 +42,17 @@ node {
             withCredentials([
               [$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]
             ]) {
-                sh """
-                  cf api ${env.PCF_API_ENDPOINT}
-                  cf auth ${CFUSER} ${CFPASS}
-                  cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
-                  cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none
-                  cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}
-                  cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}
-                  cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
-                  cf set-env ${appName} PZ_ADDR ${piazza_url}
-                """
-
+              sh "cf api ${env.PCF_API_ENDPOINT}"
+              sh "cf auth ${CFUSER} ${CFPASS}"
+              sh "cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}"
+              sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none"
+              sh "cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}"
+              sh "cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}"
+              sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
+              sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
+              if(env.GITLAB_CREDS) {
+                sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
+              }
                 try {
                   sh "cf start ${appName}"
                 } catch (Exception e) {
