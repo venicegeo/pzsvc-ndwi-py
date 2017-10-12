@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 echo "Requesting Piazza API key via piazza.$PCF_DOMAIN"
-response=$(curl -s https://piazza.$PCF_DOMAIN/v2/key -u "$BEACHFRONT_PIAZZA_AUTH")
+response=$(curl -s https://piazza.$PCF_DOMAIN/v2/key -u "${BEACHFRONT_PIAZZA_AUTH_TEXT}:")
 echo
 echo "Response:"
 echo $response|sed 's/^/    | /'
