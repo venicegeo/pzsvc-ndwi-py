@@ -1,7 +1,7 @@
 applications:
 - name: pzsvc-ndwi
   hose: pzsvc-ndwi
-  buildpack: https://github.com/cloudfoundry/buildpack-python.git
+  buildpack: python_buildpack_1_5_20
   health_check_type: process
   memory: 4G
   disk_quota: 2G
