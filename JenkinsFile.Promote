@@ -77,6 +77,8 @@ withEnv(["CF_HOME=.cf"]) {
     def appName = sh(script: "cf apps | grep 'pzsvc-ndwi-py' | cut -f1 -d ' ' ", returnStdout: true) 
     appName = appName.trim() 
     def appvers = appName[-18..-1]
+    sh "echo ${appName}"
+    sh "echo ${appvers}"
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: 'CFUSER', passwordVariable: 'CFPASS']]) {
         sh "cf api ${env.PCF_API_ENDPOINT}"
         sh "cf auth ${CFUSER} ${CFPASS}"
