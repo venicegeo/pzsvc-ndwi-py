@@ -34,39 +34,39 @@ withEnv(["CF_HOME=.cf"]) {
     }
   }
 
-  stage('Build') {
+//   stage('Build') {
 
-    authenticatePcf()
-    sh "cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}"    
+//     authenticatePcf()
+//     sh "cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}"    
 
-    // go to CF apps, see which version is running on STAGE, then find that exact version and pull that version from nexus
-    def appName = sh(script: "cf apps | grep 'pzsvc-ndwi-py' | cut -f1 -d ' ' ", returnStdout: true)
-    appName = appName.trim() 
-    def appvers = appName[-17..-1]
+//     // go to CF apps, see which version is running on STAGE, then find that exact version and pull that version from nexus
+//     def appName = sh(script: "cf apps | grep 'pzsvc-ndwi-py' | cut -f1 -d ' ' ", returnStdout: true)
+//     appName = appName.trim() 
+//     def appvers = appName[-17..-1]
 
-     sh """
-      sed -i 's,\${env.ARTIFACT_STORAGE_URL},${env.ARTIFACT_STORAGE_URL},g' pom.xml
-      ${mvn}/bin/mvn clean package -U -Dmaven.repo.local=${root}
-      cp ${root}/target/piazza-docs-1.0.0.jar ${root}/pzsvc-ndwi-py.jar
-     """
-    // Check if exists already
-    def getDependencyStatus = sh(script: """mvn -X --settings ~/.m2/settings.xml dependency:get \
-      -Dmaven.repo.local="${root}/.m2/repository" \
-      -DrepositoryId=nexus \
-      -DartifactId=pzsvc-ndwi-py \
-      -Dversion=${appvers} \
-      -DgroupId="org.venice.piazza" \
-      -Dpackaging=jar \
-      -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" \
-    """, returnStatus: true)
-    echo "dependency status = ${getDependencyStatus}"
-    if (getDependencyStatus == 0) {
-      echo "Artifact version ${appvers} exists in Nexus, nothing to do"
-    } else {
-      //the build should already exist because we are pushing an existing version
-      error("Build Failed")
-    }
-}
+//      sh """
+//       sed -i 's,\${env.ARTIFACT_STORAGE_URL},${env.ARTIFACT_STORAGE_URL},g' pom.xml
+//       ${mvn}/bin/mvn clean package -U -Dmaven.repo.local=${root}
+//       cp ${root}/target/piazza-docs-1.0.0.jar ${root}/pzsvc-ndwi-py.jar
+//      """
+//     // Check if exists already
+//     def getDependencyStatus = sh(script: """mvn -X --settings ~/.m2/settings.xml dependency:get \
+//       -Dmaven.repo.local="${root}/.m2/repository" \
+//       -DrepositoryId=nexus \
+//       -DartifactId=pzsvc-ndwi-py \
+//       -Dversion=${appvers} \
+//       -DgroupId="org.venice.piazza" \
+//       -Dpackaging=jar \
+//       -DremoteRepositories="nexus::default::${env.ARTIFACT_STORAGE_DEPLOY_URL}" \
+//     """, returnStatus: true)
+//     echo "dependency status = ${getDependencyStatus}"
+//     if (getDependencyStatus == 0) {
+//       echo "Artifact version ${appvers} exists in Nexus, nothing to do"
+//     } else {
+//       //the build should already exist because we are pushing an existing version
+//       error("Build Failed")
+//     }
+// }
 
   stage ('Deploy') {
 
