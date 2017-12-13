@@ -18,7 +18,7 @@ node {
     }
 
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
-    def appName = "pzsvc-ndwi-${appvers}"
+    def appName = "pzsvc-ndwi-${appvers}-debug"
 
     stage("Phase One Deploy") {
         if(!fileExists('.cf')) {
