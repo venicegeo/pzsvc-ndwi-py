@@ -4,7 +4,7 @@ node {
   def root = pwd()
   def mvn = tool 'M3'
   def appvers = "${env.PROMOTE_VERSION}"
-  def appBaseName = "pzsvc-ndwi-py"
+  def appBaseName = "pzsvc-ndwi"
   def appName
   def piazza_api_key = ""
   def piazza_url = "https://piazza.${env.PROMOTE_DOMAIN}"
