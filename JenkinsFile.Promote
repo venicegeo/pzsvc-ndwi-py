@@ -6,7 +6,7 @@ node {
   def appvers = "${env.PROMOTE_VERSION}"
   def appBaseName = "pzsvc-ndwi"
   def appName
-  def piazza_api_key = ""
+  def piazza_api_key = "empty"
   def piazza_url = "https://piazza.${env.PROMOTE_DOMAIN}"
 
 
@@ -70,6 +70,7 @@ node {
       if (keyCurl.contains('Please request a new API')) {
         keyCurl = sh(script: """curl -X POST -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
       }
+      echo "${keyCurl}"
       piazza_api_key = sh(script: """echo \"${keyCurl}\"|grep -oE '\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}'""", returnStdout: true).trim()
       sh """
         if [ -z $piazza_api_key ]; then
