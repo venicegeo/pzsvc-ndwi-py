@@ -29,7 +29,7 @@ node {
 		def getDependencyStatus = sh(script: """mvn -X --settings ~/.m2/settings.xml dependency:get \
 			-Dmaven.repo.local="${root}/.m2/repository" \
 			-DrepositoryId=nexus \
-			-DartifactId=pzsvc-ndwi-py \
+			-DartifactId=pzsvc-ndwi \
 			-Dversion=${appvers} \
 			-DgroupId="org.venice.beachfront" \
 			-Dpackaging=tar.gz \
@@ -46,7 +46,7 @@ node {
 			  -DgeneratePom=false \
 			  -Dpackaging=tar.gz \
 			  -Dmaven.repo.local="${root}/.m2/repository" \
-			  -DartifactId=pzsvc-ndwi-py \
+			  -DartifactId=pzsvc-ndwi \
 			  -Dversion=${appvers}
 			"""
 		}
