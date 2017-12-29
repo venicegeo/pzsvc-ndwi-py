@@ -85,7 +85,7 @@ node {
     try {
         sh "cf set-env ${appName} SPACE ${env.PROMOTE_SPACE}"
         sh "cf set-env ${appName} DOMAIN ${env.PROMOTE_DOMAIN}"
-        sh "cf set-env ${appName} PIAZZA_API_KEY ${piazza_api_key}"
+        sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
         sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
         sh "cf start ${appName}"
       } catch (Exception e) {
