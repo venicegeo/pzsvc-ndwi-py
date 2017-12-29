@@ -199,35 +199,5 @@ node {
 			}
 		}
 	}
-			
-	if(!params.SKIP_INTEGRATION_TESTS) {
-		stage("Phase Two Integration Tests") {
-			if(!fileExists("integration-tests")) {
-				sh "mkdir -p integration-tests"
-			}
-			withCredentials([
-				file(credentialsId: "${POSTMAN_SECRET_FILE}", variable: "POSTMAN_FILE")
-			]) {
-				withEnv([
-					"PATH+=${root}/integration-tests/node_modules/newman/bin:${nodejs}/bin",
-					"PCF_SPACE=${env.PHASE_TWO_PCF_SPACE}",
-					"NPM_CONFIG_CACHE=${root}/.npmcache",
-					"HOME=${WORKSPACE}"
-				]) {
-					dir ("integration-tests") {
-						if(env.INTEGRATION_GITLAB_CREDS) {
-							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}", credentialsId: "${env.INTEGRATION_GITLAB_CREDS}"
-						} else {
-							git url: "${env.INTEGRATION_GIT_URL}", branch: "${env.INTEGRATION_GIT_BRANCH}"
-						}
-						sh """
-							mkdir -p ${root}/.npmcache
-							npm install newman@2
-						"""
-						sh "sh ci/beachfront.sh"
-					}
-				}
-			}
-		}
-	}
+
 }
