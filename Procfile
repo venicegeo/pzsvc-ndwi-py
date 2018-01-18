@@ -1,1 +1,1 @@
-polling: dispatcher pzsvc-exec.conf
+web: dispatcher pzsvc-exec.conf
