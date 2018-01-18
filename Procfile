@@ -1,1 +1,1 @@
-web: pzsvc-taskworker pzsvc-exec.conf & pzsvc-exec pzsvc-exec.conf
+polling: dispatcher pzsvc-exec.conf
