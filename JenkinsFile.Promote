@@ -87,6 +87,9 @@ node {
         sh "cf set-env ${appName} DOMAIN ${env.PROMOTE_DOMAIN}"
         sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
         sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
+				sh "cf set-env ${appName} CF_USER ${CFUSER}"
+				sh "cf set-env ${appName} CF_PASS ${CFPASS}"
+				sh "cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}"
         sh "cf start ${appName}"
       } catch (Exception e) {
         try {
