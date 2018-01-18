@@ -84,7 +84,7 @@ node {
 				sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
 				sh "cf set-env ${appName} CF_USER ${CFUSER}"
 				sh "cf set-env ${appName} CF_PASS ${CFPASS}"
-				sh "cf set-env ${appName} CF_API ${env.PCF_API_ENDPOINT}"
+				sh "cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}"
 				if(env.GITLAB_CREDS) {
 					sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
 				}
@@ -170,6 +170,9 @@ node {
 						cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
 						cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
 						cf set-env ${appName} PZ_ADDR ${piazza_url}
+						sh "cf set-env ${appName} CF_USER ${CFUSER}"
+						sh "cf set-env ${appName} CF_PASS ${CFPASS}"
+						sh "cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}"
 					"""
 
 					try {
