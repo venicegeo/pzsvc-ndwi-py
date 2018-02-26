@@ -1,6 +1,6 @@
 # pzsvc-ndwi-py
 
-The ndwi shore-finding algorithm, written in python, and made into a Piazza service via pzsvc-exec
+The ndwi shore-finding algorithm, written in python, and made into a Piazza service via pzsvc-exec 
 
 pzsvc-ndwi-py is currently configured as a taskworker/local-only service.  As such, it receives external jobs only through the Pz instance indicated at environment variable PZ_ADDR.  On startup, assuming all environment variables are set properly and the Pz instance is working, it will autoregister itself with the name "BF_Algo_NDWI_PY", and will stand by to complete any jobs sent to that service.  An example of a reasonable, working job block is as follows:
 
