@@ -3,6 +3,7 @@ applications:
   hose: pzsvc-ndwi
   buildpack: https://github.com/cloudfoundry/buildpack-python.git
   health_check_type: process
+  timeout: 180
   memory: 2G
   disk_quota: 2G
   env:
