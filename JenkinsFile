@@ -19,7 +19,7 @@ node {
 
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()
     def appName = "pzsvc-ndwi-${appvers}"
-	
+
 	stage("Archive") {
 		// Build Tarball
 		def targetFiles = "environment.yml Procfile manifest.jenkins.yml pzsvc-exec.conf"
@@ -77,7 +77,7 @@ node {
 				sh "cf api ${env.PCF_API_ENDPOINT}"
 				sh "cf auth ${CFUSER} ${CFPASS}"
 				sh "cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}"
-				sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none"
+				sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start"
 				sh "cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}"
 				sh "cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}"
 				sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
@@ -113,7 +113,7 @@ node {
             }
         }
     }
-	
+
     if(!params.SKIP_INTEGRATION_TESTS) {
         stage("Phase One Integration Tests") {
 			if(!fileExists("integration-tests")) {
