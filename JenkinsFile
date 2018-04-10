@@ -5,9 +5,25 @@ node {
 	def nodejs = tool 'NodeJS_6'
 	def mvn = tool 'M3'
 
+  stage("Config") {
+    // clone the configuration repository and copy the current configuration
+    def configDir = "${root}/configuration"
+    def configFile = "${root}/config.json"
+    dir(configDir) {
+      git url: "${env.CONFIGURATION_URL}", credentialsId: "${env.CONFIGURATION_CREDS}"
+      sh "mv ${configDir}/${ENVIRONMENT}-config.json ${configFile}"
+      deleteDir()
+    }
+    // read the current configuration
+    def configJson = readJSON file: "${configFile}"
+    for (param in configJson.credparams + configJson.jobparams) { 
+      env."${param.name}" = (param.type == "booleanParam") ? "${param.defaultvalue}".toBoolean() : "${param.defaultvalue}"
+    }
+  }
+	
 	stage("Setup") {
 		deleteDir()
-		if(env.GITLAB_CREDS) {
+		if(env.USE_GIT_CREDS) {
 			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
 		} else {
 			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
@@ -58,7 +74,7 @@ node {
         }
         def piazza_api_key = "empty"
         def piazza_url = "https://piazza.${env.PHASE_ONE_PCF_DOMAIN}"
-        withCredentials([[$class: 'StringBinding', credentialsId: "${params.BEACHFRONT_PIAZZA_AUTH_TEXT}", variable: 'TOKEN']]) {
+        withCredentials([[$class: 'StringBinding', credentialsId: "${env.BEACHFRONT_PIAZZA_AUTH_TEXT}", variable: 'TOKEN']]) {
             def keyCurl = sh(script: """curl -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
             piazza_api_key = sh(script: """echo \"${keyCurl}\"|grep -oE '\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}'""", returnStdout: true).trim()
             sh """
@@ -114,7 +130,7 @@ node {
         }
     }
 
-    if(!params.SKIP_INTEGRATION_TESTS) {
+    if(!env.SKIP_INTEGRATION_TESTS) {
         stage("Phase One Integration Tests") {
 			if(!fileExists("integration-tests")) {
                 sh "mkdir -p integration-tests"
@@ -143,11 +159,11 @@ node {
         }
     }
 
-	if(params.DEPLOY_PHASE_TWO) {
+	if(env.DEPLOY_PHASE_TWO) {
 		stage("Phase Two Deploy") {
 			def piazza_api_key = "empty"
 			def piazza_url = "https://piazza.${env.PHASE_TWO_PCF_DOMAIN}"
-			withCredentials([[$class: 'StringBinding', credentialsId: "${params.BEACHFRONT_PIAZZA_AUTH_TEXT}", variable: 'TOKEN']]) {
+			withCredentials([[$class: 'StringBinding', credentialsId: "${env.BEACHFRONT_PIAZZA_AUTH_TEXT}", variable: 'TOKEN']]) {
 				def keyCurl = sh(script: """curl -s ${piazza_url}/v2/key -u \"${TOKEN}:\"""", returnStdout: true)
 				piazza_api_key = sh(script: """echo \"${keyCurl}\"|grep -oE '\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}'""", returnStdout: true).trim()
 				sh """
