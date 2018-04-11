@@ -23,7 +23,7 @@ node {
 	
 	stage("Setup") {
 		deleteDir()
-		if(env.USE_GIT_CREDS) {
+		if(env.USE_GIT_CREDS.toBoolean()) {
 			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}", credentialsId: "${env.GITLAB_CREDS}"
 		} else {
 			git url: "${env.GIT_URL}", branch: "${env.GIT_BRANCH}"
@@ -101,7 +101,7 @@ node {
 				sh "cf set-env ${appName} CF_USER ${CFUSER}"
 				sh "cf set-env ${appName} CF_PASS ${CFPASS}"
 				sh "cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}"
-				if(env.GITLAB_CREDS) {
+				if(env.USE_GIT_CREDS.toBoolean()) {
 					sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
 				}
 				try {
@@ -130,7 +130,7 @@ node {
         }
     }
 
-    if(!env.SKIP_INTEGRATION_TESTS) {
+    if(!env.SKIP_INTEGRATION_TESTS.toBoolean()) {
         stage("Phase One Integration Tests") {
 			if(!fileExists("integration-tests")) {
                 sh "mkdir -p integration-tests"
@@ -159,7 +159,7 @@ node {
         }
     }
 
-	if(env.DEPLOY_PHASE_TWO) {
+	if(env.DEPLOY_PHASE_TWO.toBoolean()) {
 		stage("Phase Two Deploy") {
 			def piazza_api_key = "empty"
 			def piazza_url = "https://piazza.${env.PHASE_TWO_PCF_DOMAIN}"
@@ -190,7 +190,7 @@ node {
 						cf set-env ${appName} CF_PASS ${CFPASS}
 						cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}
 					"""
-					if(env.GITLAB_CREDS) {
+					if(env.USE_GIT_CREDS.toBoolean()) {
 						sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
 					}
 					try {
