@@ -1,6 +1,7 @@
 name: pzsvc-ndwi
 channels:
   - CONDA_CHANNEL
+  - conda-forge
 dependencies:
   - bfalg-ndwi
   - pzsvc-exec
