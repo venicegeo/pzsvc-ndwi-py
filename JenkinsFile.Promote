@@ -100,6 +100,7 @@ node {
     try {
         sh "cf set-env ${appName} SPACE ${env.PROMOTE_SPACE}"
         sh "cf set-env ${appName} DOMAIN ${env.PROMOTE_DOMAIN}"
+        sh "cf set-env ${appName} HTTP_TIMEOUT ${env.BF_ALG_HTTP_TIMEOUT}"
         sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
         sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]]) {

@@ -96,6 +96,7 @@ node {
 				sh "cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_ONE_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start"
 				sh "cf set-env ${appName} SPACE ${env.PHASE_ONE_PCF_SPACE}"
 				sh "cf set-env ${appName} DOMAIN ${env.PHASE_ONE_PCF_DOMAIN}"
+        sh "cf set-env ${appName} HTTP_TIMEOUT ${env.BF_ALG_HTTP_TIMEOUT}"
 				sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
 				sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
 				sh "cf set-env ${appName} CF_USER ${CFUSER}"
@@ -184,6 +185,7 @@ node {
 						cf push ${appName} -f manifest.jenkins.yml --hostname ${appName} -d ${env.PHASE_TWO_PCF_DOMAIN} -b ${env.PYTHON_BUILDPACK_NAME} --no-start -u none
 						cf set-env ${appName} SPACE ${env.PHASE_TWO_PCF_SPACE}
 						cf set-env ${appName} DOMAIN ${env.PHASE_TWO_PCF_DOMAIN}
+            cf set-env ${appName} HTTP_TIMEOUT ${env.BF_ALG_HTTP_TIMEOUT}
 						cf set-env ${appName} PZ_API_KEY ${piazza_api_key}
 						cf set-env ${appName} PZ_ADDR ${piazza_url}
 						cf set-env ${appName} CF_USER ${CFUSER}
