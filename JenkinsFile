@@ -31,6 +31,8 @@ node {
 		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.ARTIFACT_READ_ONLY_CREDS}", usernameVariable: "USER", passwordVariable: "PASS"]]) {
 			sh 'sed -i "s*CONDA_CHANNEL*`echo "${CONDA_CHANNEL_URL}" | sed "s#://#://${USER}:${PASS}@#g"`*g" environment.yml'
 		}
+		sh 'sed -i "s/bfalg-ndwi=VERSION/bfalg-ndwi=${env.GIT_BRANCH}/g" environment.yml'
+		sh 'sed -i "s/pzsvc-exec=VERSION/pzsvc-exec=${env.GIT_BRANCH}/g" environment.yml'
 	}
 
     def appvers = sh(script: """git describe --long --tags --always | sed 's/\\./-/'g""", returnStdout: true).trim()

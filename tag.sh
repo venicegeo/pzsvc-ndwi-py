@@ -1,7 +1,7 @@
 #!/bin/bash
-tag=$1
-if [ -z "$tag" ]; then
+v=$1
+if [ -z "$v" ]; then
   exit 1
 fi
-sed -i "s/bfalg-ndwi=x/bfalg-ndwi=$tag/g" environment.yml
-sed -i "s/pzsvc-exec=x/pzsvc-exec=$tag/g" environment.yml
+sed -i "s/bfalg-ndwi=VERSION/bfalg-ndwi=$v/g" environment.yml
+sed -i "s/pzsvc-exec=VERSION/pzsvc-exec=$v/g" environment.yml
