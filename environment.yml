@@ -2,5 +2,5 @@ name: pzsvc-ndwi
 channels:
   - CONDA_CHANNEL
 dependencies:
-  - bfalg-ndwi
-  - pzsvc-exec
+  - bfalg-ndwi=REPLACE_VERSION
+  - pzsvc-exec=REPLACE_VERSION
