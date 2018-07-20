@@ -120,12 +120,12 @@ node {
 					cf target -o ${env.PCF_ORG} -s ${env.PHASE_ONE_PCF_SPACE}
 				"""
 				def legacyAppNames = sh(script: """cf routes | grep \"pzsvc-ndwi\" | awk '{print \$4}'""", returnStdout: true)
-				sh "cf map-route ${appName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname pzsvc-ndwi"
+				sh "cf map-route ${appName} apps.internal --hostname pzsvc-ndwi-${env.PHASE_ONE_PCF_SPACE}"
 				// Remove legacy applications
 				for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
 					def legacyAppName = legacyApp.toString().trim()
 					if(legacyAppName != appName) {
-						sh "cf unmap-route ${legacyAppName} ${env.PHASE_ONE_PCF_DOMAIN} --hostname pzsvc-ndwi"
+						sh "cf unmap-route ${legacyAppName} apps.internal --hostname pzsvc-ndwi-${env.PHASE_ONE_PCF_SPACE}"
 						sh "cf delete -f ${legacyAppName} -r"
 					}
 				}
@@ -214,12 +214,12 @@ node {
 						cf target -o ${env.PCF_ORG} -s ${env.PHASE_TWO_PCF_SPACE}
 					"""
 					def legacyAppNames = sh(script: """cf routes | grep \"pzsvc-ndwi\" | awk '{print \$4}'""", returnStdout: true)
-					sh "cf map-route ${appName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname pzsvc-ndwi"
+					sh "cf map-route ${appName} apps.internal --hostname pzsvc-ndwi-${env.PHASE_TWO_PCF_SPACE}"
 					// Remove legacy applications
 					for (Object legacyApp : legacyAppNames.trim().tokenize(',')) {
 						def legacyAppName = legacyApp.toString().trim()
 						if(legacyAppName != appName) {
-							sh "cf unmap-route ${legacyAppName} ${env.PHASE_TWO_PCF_DOMAIN} --hostname pzsvc-ndwi"
+							sh "cf unmap-route ${legacyAppName} apps.internal --hostname pzsvc-ndwi-${env.PHASE_TWO_PCF_SPACE}"
 							sh "cf delete -f ${legacyAppName} -r"
 						}
 					}
