@@ -103,6 +103,7 @@ node {
         sh "cf set-env ${appName} HTTP_TIMEOUT ${env.BF_ALG_HTTP_TIMEOUT}"
         sh "cf set-env ${appName} PZ_API_KEY ${piazza_api_key}"
         sh "cf set-env ${appName} PZ_ADDR ${piazza_url}"
+        sh "cf set-env ${appName} GDAL_CACHEMAX 64"
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.PCF_CREDS}", usernameVariable: "CFUSER", passwordVariable: "CFPASS"]]) {
           sh "cf set-env ${appName} CF_USER ${CFUSER}"
           sh "cf set-env ${appName} CF_PASS ${CFPASS}"
