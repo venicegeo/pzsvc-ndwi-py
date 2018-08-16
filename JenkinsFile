@@ -104,6 +104,7 @@ node {
 				sh "cf set-env ${appName} CF_USER ${CFUSER}"
 				sh "cf set-env ${appName} CF_PASS ${CFPASS}"
 				sh "cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}"
+				sh "cf set-env ${appName} GDAL_CACHEMAX 64"
 				if(env.USE_GIT_CREDS.toBoolean()) {
 					sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
 				}
@@ -193,6 +194,7 @@ node {
 						cf set-env ${appName} CF_USER ${CFUSER}
 						cf set-env ${appName} CF_PASS ${CFPASS}
 						cf set-env ${appName} CF_API https://${env.PCF_API_ENDPOINT}
+						cf set-env ${appName} GDAL_CACHEMAX 64
 					"""
 					if(env.USE_GIT_CREDS.toBoolean()) {
 						sh "cf set-env ${appName} REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt"
